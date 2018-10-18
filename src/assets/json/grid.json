@@ -1,0 +1,271 @@
+{
+  "data": [{
+      "partid": "AR0-32D0-12",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Square Rim Top, Flat Bottom, Clear 33, No Patch, 100/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32D0-13",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Square Rim Top, Flat Bottom, Clear 33, No Patch, 1000/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32F0-12",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Beveled Edge Top, Flat Bottom, Clear 33, No Patch, 100/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32F0-13",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Beveled Edge Top, Flat Bottom, Clear 33, No Patch, 1000/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32G0-12",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Beveled Edge Top, Round Bottom, Clear 33, No Patch, 100/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32G0-13",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 22x38mm, 6mL, Beveled Edge Top, Round Bottom, Clear 33, No Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32H0-12",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 23x46mm, 10mL, 18 mm Screw, Round Bottom, Clear 33, No Patch, 100/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32H0-13",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 23x46mm, 10mL, 18 mm Screw, Round Bottom, Clear 33, No Patch, 1000/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32H1-12",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 23x46mm, 10mL, 18 mm Screw, Round Bottom, Amber 51, No Patch, 100/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-32H1-13",
+      "brand": "VERX",
+      "description": "Verex™ Headspace Vial, 23x46mm, 10mL, 18 mm Screw, Round Bottom, Amber 51, No Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-35V0-22",
+      "brand": "VERX",
+      "description": "Verex™ Vial, VOA/ASE 40mL Screw, Clear 33 24-400 Threads ( No Cap ), 200/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-35V1-22",
+      "brand": "VERX",
+      "description": "Verex™ Vial, VOA/ASE 40mL Screw, Amber 51 24-400 Threads ( No Cap ), 200/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-36S0-12-C",
+      "brand": "VERX",
+      "description": "Verex™ Cert+ Vial, Snap Top, Polypropylene, 300µL Clear, No Patch, 100/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-36S0-13-C",
+      "brand": "VERX",
+      "description": "Verex™ Cert+ Vial, Snap Top, Polypropylene, 300µL Clear, No Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+
+      "partid": "AR0-37K0-12",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Clear 33, No Patch, 100/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37K0-13",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Clear 33, No Patch, 1000/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37K1-12",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Amber 51, No Patch, 100/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37K1-13",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Amber 51, No Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37L0-12",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Clear 33, w/ Patch, 100/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37L0-13",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Clear 33, w/ Patch, 1000/Pk",
+      "image": "./assets/img/a.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37L1-12",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Amber 51, w/ Patch, 100/Pk",
+      "image": "./assets/img/b.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-37L1-13",
+      "brand": "VERX",
+      "description": "Verex™ Vial, Crimp, 2mL, Wide Mouth, Amber 51, w/ Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-39S0-12-C",
+      "brand": "VERX",
+      "description": "Verex™ Cert+ Vial, 9mm Screw Top, Polypropylene, 300µL, Clear, No Patch, 100/Pk",
+      "image": "./assets/img/d.png",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    },
+    {
+      "partid": "AR0-39S0-13-C",
+      "brand": "VERX",
+      "description": "Verex™ Cert+ Vial, 9mm Screw Top, Polypropylene, 300µL, Clear, No Patch, 1000/Pk",
+      "image": "./assets/img/c.jpg",
+      "Category": {
+        "CategoryID": 1,
+        "CategoryName": "Beverages",
+        "Description": "Soft drinks, coffees, teas, beers, and ales"
+      }
+    }
+  ],
+  "total": 10,
+  "aggregateResults": null,
+  "errors": null
+}

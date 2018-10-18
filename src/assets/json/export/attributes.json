@@ -1,0 +1,82 @@
+[
+  {
+    "key": 1,
+    "value": "Part#",
+    "multiselect": true,
+    "type": "number",
+    "file": false,
+    "unit": "Foot"
+  },
+  {
+    "key": 2,
+    "value": "Brand",
+    "multiselect": false,
+    "type": "string",
+    "file": false,
+    "unit": ""
+  },
+  {
+    "key": 3,
+    "value": "Long Description",
+    "multiselect": true,
+    "type": "number",
+    "file": false,
+    "unit": "Mile"
+  },
+  {
+    "key": 4,
+    "value": "Short Description",
+    "multiselect": false,
+    "type": "string",
+    "file": true,
+    "unit": ""
+  },
+  {
+    "key": 5,
+    "value": "UOM",
+    "multiselect": false,
+    "type": "number",
+    "file": false,
+    "unit": "Foot"
+  },
+  {
+    "key": 6,
+    "value": "Image URL",
+    "multiselect": true,
+    "type": "string",
+    "file": true,
+    "unit": ""
+  },
+  {
+    "key": 7,
+    "value": "Tariff Code",
+    "multiselect": false,
+    "type": "string",
+    "file": true,
+    "unit": ""
+  },
+  {
+    "key": 8,
+    "value": "Synonyms",
+    "multiselect": false,
+    "type": "number",
+    "file": false,
+    "unit": "Micrometer"
+  },
+  {
+    "key": 9,
+    "value": "Min QTY",
+    "multiselect": true,
+    "type": "string",
+    "file": false,
+    "unit": ""
+  },
+  {
+    "key": 9,
+    "value": "Max QTY",
+    "multiselect": true,
+    "type": "string",
+    "file": false,
+    "unit": ""
+  }
+]

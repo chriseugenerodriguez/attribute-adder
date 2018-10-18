@@ -1,0 +1,13 @@
+.form-group {
+
+	.form-control {
+
+		&.k-block,
+		&.k-widget {
+
+			.k-input {
+				height: initial;
+			}
+		}
+	}
+}

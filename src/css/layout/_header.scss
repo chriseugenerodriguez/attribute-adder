@@ -1,0 +1,38 @@
+header {
+	color: rgba(255, 255, 255, 0.75);
+	background-color: #333;
+
+	h1 {
+		margin: 0px;
+    font-size: 18px;
+		float: left;
+		height: 40px;
+    display: block;
+    padding: 10px 25px;
+		background: #cb2d3e;  /* fallback for old browsers */
+		background: -webkit-linear-gradient(to bottom, #ef473a, #cb2d3e);  /* Chrome 10-25, Safari 5.1-6 */
+		background: linear-gradient(to bottom, #ef473a, #cb2d3e); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+				
+    color: #fff;
+	}
+	.right {
+		float: right;
+		display: flex;
+		
+		.btn {
+			@include border-radius(0px);
+			padding: 9px 12px;
+			background:#454545;
+			display: inline-flex;
+			border-right:1px solid #343434;
+			
+			&:hover {
+				color:#fff;
+			}
+
+			&:last-of-type {
+				border-right:none;
+			}
+		}
+	}
+}

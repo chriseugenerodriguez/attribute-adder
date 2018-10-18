@@ -1,0 +1,13 @@
+[
+	{ "key": 1, "value": "Kilometer" },
+	{ "key": 2, "value": "Meter" },
+	{ "key": 3, "value": "Centimeter" },
+	{ "key": 4, "value": "Millimeter" },
+	{ "key": 5, "value": "Micrometer" },
+	{ "key": 6, "value": "Nanometer" },
+	{ "key": 7, "value": "Mile" },
+	{ "key": 8, "value": "Yard" },
+	{ "key": 9, "value": "Foot" },
+	{ "key": 10, "value": "Inch" },
+	{ "key": 11, "value": "Nautical mile" }
+]

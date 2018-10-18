@@ -1,0 +1,6 @@
+[
+    { "key": 1, "value": "US List (USD)" },
+    { "key": 2, "value": "DE List (EUR)" },
+    { "key": 3, "value": "DK List (DKK)" },
+    { "key": 4, "value": "SE List (SEK)" }
+]

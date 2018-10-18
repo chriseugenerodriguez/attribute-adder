@@ -1,0 +1,19 @@
+<header>
+  <div class="container">
+    <h1>Product Information Management</h1>
+    <div class="right">
+      <button id="export" type="button" class="btn btn-secondary" (click)="popup('export')">Export Parts</button>
+      <button id="manage" type="button" class="btn btn-secondary" (click)="popup('attributes')">Manage Attributes</button>
+      <button id="uom" type="button" class="btn btn-secondary" (click)="popup('units')">Manage Units</button>
+    </div>
+  </div>
+</header>
+
+<!-- EXPORT -->
+<export *ngIf="EOpened" (open)="export($event)"></export>
+
+<!-- ATTRIBUTES -->
+<attributes *ngIf="AOpened" (open)="attributes($event)"></attributes>
+
+<!-- UNITS -->
+<units *ngIf="UOpened" (open)="units($event)"></units>

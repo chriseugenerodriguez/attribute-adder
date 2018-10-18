@@ -1,0 +1,84 @@
+// -----------------------------------------------------------------------------
+// This file contains very basic styles.
+// -----------------------------------------------------------------------------
+
+/**
+ * Set up a decent box model on the root element
+ */
+body {
+	background: $body-bg;
+	color: $gray-dark;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	font: normal 125% / 1.4 $font-size-base;
+}
+
+
+/**
+ * Make all elements from the DOM inherit from the parent box-sizing
+ * Since `*` has a specificity of 0, it does not override the `html` value
+ * making all elements inheriting from the root box-sizing value
+ * See: https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
+ */
+* {
+	@include box-sizing(border-box);
+
+	&::before,
+	&::after {
+		@include box-sizing(border-box);
+	}
+}
+
+@media (min-width: 1400px) {
+	.container {
+		width: $screen-xl;
+	}
+}
+
+.align-right {
+	text-align: right;
+}
+
+html,
+body {
+	background: #f2f2f2;
+
+	.container {
+
+		phx-applications,
+		phx-sample-prep {
+			padding: 30px;
+		}
+
+		phx-form,
+		phx-applications,
+		phx-sample-prep,
+		phx-sample-pre-create,
+		phx-user {
+			background: #fff;
+			display: block;
+			position: relative;
+		}
+	}
+}
+
+/**
+ * Basic styles for links
+ */
+a {
+	color: $link-color;
+	text-decoration: $link-decoration;
+	cursor: pointer;
+
+	&:visited {
+		color: $link-color;
+	}
+
+	&:hover {
+		color: $link-hover-color;
+		text-decoration: $link-hover-decoration;
+	}
+
+	&:active {
+		color: $link-color;
+	}
+}

@@ -1,0 +1,322 @@
+<!-- MANAGE -->
+<kendo-dialog class="manage" title="Manage Attributes" (close)="manage('close')">
+  <ng-container *ngFor="let i of message">
+    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true"> {{ i.value
+      }} </alert>
+  </ng-container>
+  <div class="row">
+    <div class="list-attributes" *ngIf="groupView">
+      <input [(ngModel)]="listUnits" kendoTextBox class="form-control" placeholder="Filter Attributes" type="text"
+        (keyup)="filterAttribute($event)" />
+    </div>
+    <div class="selected-attribute" *ngIf="singleView || singleAdd || singleEdit">
+      <h3 class="title">
+        Attribute: {{singleSelectedValue.Name}}
+      </h3>
+    </div>
+
+    <div class="selected-attribute" *ngIf="groupCreate">
+      <h3 class="title">
+        Create Attribute
+      </h3>
+    </div>
+  </div>
+  <div class="row">
+    <!-- GROUP - GROUP -->
+    <table class="table table-hover sp" [formGroup]="Attributes" *ngIf="groupAttribute">
+      <thead>
+        <tr>
+          <td></td>
+          <td>Name</td>
+          <td width="80">Multiple</td>
+          <td width="90">Type</td>
+          <td>UOM</td>
+          <td width="40" *ngIf="groupDelete || groupEdit"></td>
+        </tr>
+      </thead>
+      <tbody formArrayName="items">
+        <tr *ngIf="!inputsAttributes.length">
+          <td colspan="7" class="text-center">No Results Found</td>
+        </tr>
+        <tr *ngFor="let x of Attributes.controls['items'].controls; let i = index;" [formGroupName]="i">
+          <td width="50">{{ i + 1 }}</td>
+          <td>
+            <input *ngIf="editStep == i" type="text" class="form-control" formControlName="Name" />
+            <span *ngIf="editStep !== i">
+              <a *ngIf="editStep == null" class="cursor" (click)="manageSingleUnit(x)">{{ x.value.Name }}</a>
+              <span *ngIf="editStep !== null">{{ x.value.Name }}</span>
+            </span>
+          </td>
+          <td>
+            <span *ngIf="x.value.Multiselect">Yes</span>
+            <span *ngIf="!x.value.Multiselect">No</span>
+          </td>
+          <td>
+            <span *ngIf="x.value.Type === 'number'">Number</span>
+            <span *ngIf="x.value.Type === 'string' && !x.value.File">String</span>
+            <span *ngIf="x.value.Type === 'string' && x.value.File">File</span>
+          </td>
+          <td><span *ngIf="x.value.Type === 'number'">{{ x.value.Unit }}</span></td>
+          <td *ngIf="groupDelete || groupEdit">
+            <span *ngIf="groupDelete" class="fa fa-times-circle pull-right cursor" (click)="removeGroupStep(i)"></span>
+            <span *ngIf="groupEdit" (click)="editGroupStep(i)" class="fa fa-pencil cursor"></span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- GROUP - SINGLE -->
+    <table class="table table-hover sp" [formGroup]="Attribute" *ngIf="singleAttribute">
+      <!-- Number -->
+      <ng-container *ngIf="!attributeString && !singleSelectedValue['File']">
+        <thead>
+          <tr>
+            <td width="60"></td>
+            <td>Number</td>
+            <td>Unit</td>
+            <td width="40" *ngIf="singleDelete || singleEdit"></td>
+          </tr>
+        </thead>
+        <tbody formArrayName="items">
+          <tr *ngIf="!attributeFeatures">
+            <td colspan="3">Please Add an Attribute</td>
+          </tr>
+          <tr *ngFor="let x of Attribute.controls['items'].controls; let i = index;" [formGroupName]="i">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <input *ngIf="editStep == i" type="number" class="form-control" formControlName="Number" />
+              <span *ngIf="editStep !== i">{{ x.value.Number }}</span>
+            </td>
+            <td>{{ singleSelectedValue.unit }}</td>
+
+            <td *ngIf="singleDelete || singleEdit">
+              <span *ngIf="singleDelete" class="fa fa-times-circle pull-right cursor" (click)="removeSingleStep(i)"></span>
+              <span *ngIf="singleEdit" class="fa fa-pencil cursor" (click)="editSingleStep(i)"></span>
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!-- String -->
+      <ng-container *ngIf="attributeString && !singleSelectedValue['File']">
+        <thead>
+          <tr>
+            <td width="60"></td>
+            <td>Name</td>
+            <td>Details</td>
+            <td width="40" *ngIf="singleDelete || singleEdit"></td>
+          </tr>
+        </thead>
+        <tbody formArrayName="items">
+          <tr *ngIf="0">
+            <td colspan="4">Please Add Attribute</td>
+          </tr>
+          <tr *ngFor="let x of Attribute.controls['items'].controls; let i = index;" [formGroupName]="i">
+            <td>
+              {{ i + 1 }}
+            </td>
+            <td>
+              <input *ngIf="editStep == i" type="text" class="form-control" formControlName="Name" />
+              <span *ngIf="editStep !== i">{{ x.value.Name }}</span>
+            </td>
+            <td>
+              <input *ngIf="editStep == i" type="text" class="form-control" formControlName="Details" />
+              <span *ngIf="editStep !== i">{{ x.value.Details }}</span>
+            </td>
+            <td *ngIf="singleDelete || singleEdit">
+              <span *ngIf="singleDelete" class="fa fa-times-circle pull-right cursor" (click)="removeSingleStep(i)"></span>
+              <span *ngIf="singleEdit" class="fa fa-pencil cursor" (click)="editSingleStep(i)"></span>
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!--File-->
+      <ng-container *ngIf="singleSelectedValue['File']">
+        <thead>
+          <tr>
+            <td width="60"></td>
+            <td width="40"></td>
+            <td>File Name</td>
+            <td width="40" *ngIf="singleDelete || singleEdit"></td>
+          </tr>
+        </thead>
+        <tbody formArrayName="items">
+          <tr *ngIf="0">
+            <td colspan="4">Please Add Attribute</td>
+          </tr>
+          <tr *ngFor="let x of Attribute.controls['items'].controls; let i = index;" [formGroupName]="i">
+            <td>
+              {{ i + 1 }}
+            </td>
+            <td>
+              {{ x.value.Ext }}
+              <span *ngIf="x.value.Ext === '.pdf'" class="fa fa-file-pdf-o"></span>
+              <span *ngIf="x.value.Ext === '.mp4'" class="fa fa-file-video-o"></span>
+              <span *ngIf="x.value.Ext === '.mp3'" class="fa fa-file-audio-o"></span>
+              <span *ngIf="x.value.Ext === '.docx'" class="fa fa-file-word-o"></span>
+              <span *ngIf="x.value.Ext === '.ppt'" class="fa fa-file-powerpoint-o"></span>
+              <span *ngIf="x.value.Ext === '.xlsx'" class="fa fa-file-excel-o"></span>
+              <span *ngIf="x.value.Ext === '.txt'" class="fa fa-file-text-o"></span>
+              <span *ngIf="x.value.Ext === '.svg'" class="fa fa-file-code-o"></span>
+              <span *ngIf="x.value.Ext === '.png' || x.value.Ext === '.gif' || x.value.Ext === '.jpg'"
+                class="fa fa-file-image-o"></span>
+            </td>
+            <td>
+              <a *ngIf="editStep !== i" href="{{ x.value.Url }}" target="_blank">{{ x.value.Name }}</a>
+              <kendo-upload *ngIf="editStep == i" [multiple]="false" [saveUrl]="uploadUrl" [removeUrl]="uploadRemoveCSV"
+                (success)="uploadSuccess($event)" (upload)="uploadEvent($event)" [withCredentials]="false" formControlName="uploadFile">
+                <ng-template kendoUploadFileTemplate let-files let-state="state">
+                  <div *ngIf="format(state) == false" class="upload">
+                    Wrong file type, please try again.
+                  </div>
+                  <div *ngIf="format(state)" class="upload">
+                    {{files[0].name}}
+                  </div>
+                </ng-template>
+              </kendo-upload>
+            </td>
+            <td *ngIf="singleDelete || singleEdit">
+              <span *ngIf="singleDelete" class="fa fa-times-circle pull-right cursor" (click)="removeUploadFile(x.value.Uid, i)"></span>
+              <span *ngIf="singleEdit" class="fa fa-pencil cursor" (click)="editSingleStep(i)"></span>
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+    </table>
+
+    <!-- ADD - SINGLE -->
+    <table class="table table-hover sp" [formGroup]="Add" *ngIf="singleAdd">
+      <!-- Number -->
+      <ng-container *ngIf="!attributeString">
+        <thead>
+          <tr>
+            <td width="200">Number</td>
+            <td width="100">Unit</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <input type="number" class="form-control" formControlName="Number" />
+            </td>
+            <td>
+              {{ singleSelectedValue.Unit }}
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!-- String -->
+      <ng-container *ngIf="attributeString && !singleSelectedValue['File']">
+        <thead>
+          <tr>
+            <td>Name</td>
+            <td>Details</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <input type="text" class="form-control" formControlName="Name" />
+            </td>
+            <td>
+              <input type="text" class="form-control" formControlName="Details" />
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!--File Upload-->
+      <ng-container *ngIf="attributeString && singleSelectedValue['File']">
+        <thead>
+          <tr>
+            <td>Upload File</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <kendo-upload [multiple]="false" [saveUrl]="uploadUrl" [removeUrl]="uploadRemoveCSV" (success)="uploadSuccess($event)" 
+              (upload)="uploadEvent($event)" [withCredentials]="false" formControlName="File">
+                <ng-template kendoUploadFileTemplate let-files let-state="state">
+                  <div *ngIf="format(state) == false" class="upload">
+                    Wrong file type, please try again.
+                  </div>
+                  <div *ngIf="format(state)" class="upload">
+                    {{files[0].name}}
+                  </div>
+                </ng-template>
+              </kendo-upload>
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+    </table>
+
+    <!-- ADD - GROUP -->
+    <table class="table table-hover sp" [formGroup]="Create" *ngIf="groupCreate">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Multiple</td>
+          <td>Type</td>
+          <td *ngIf="attributeFile">Upload</td>
+          <td *ngIf="attributeUnit">Unit</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <input type="text" class="form-control" formControlName="Name" />
+          </td>
+          <td>
+            <kendo-switch [onLabel]="'Yes'" [offLabel]="'No'" formControlName="Multiselect"></kendo-switch>
+          </td>
+          <td>
+            <kendo-dropdownlist class="form-control" [data]="type" valueField="key" textField="value" [valuePrimitive]="true"
+              formControlName="Type" (valueChange)="typeChange($event)">
+            </kendo-dropdownlist>
+          </td>
+          <td *ngIf="attributeFile">
+            <kendo-switch [onLabel]="'Yes'" [offLabel]="'No'" formControlName="File"></kendo-switch>
+          </td>
+          <td *ngIf="attributeUnit">
+            <kendo-dropdownlist class="form-control" [data]="unit" valueField="key" textField="value" [valuePrimitive]="true"
+              formControlName="Unit">
+            </kendo-dropdownlist>
+          </td>
+      </tbody>
+    </table>
+  </div>
+
+
+  <kendo-dialog-actions id="attribute-group" *ngIf="groupView">
+    <button class="k-button" (click)="manage('group-edit')">Edit</button>
+    <button class="k-button" (click)="manage('group-delete')">Delete</button>
+    <button class="k-button k-primary" dir="ltr" primary="true" (click)="manage('group-create')">Create</button>
+  </kendo-dialog-actions>
+
+  <kendo-dialog-actions id="attribute-single" *ngIf="singleView">
+    <button class="k-button" type="button" (click)="manage('single-back')">Back</button>
+    <button class="k-button" (click)="manage('single-edit')">Edit</button>
+    <button class="k-button" (click)="manage('single-delete')" *ngIf="!singleSelectedValue.file">Delete</button>
+    <button class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-add')">Add</button>
+  </kendo-dialog-actions>
+
+  <kendo-dialog-actions id="attribute-single-confirm" *ngIf="singleSelect">
+    <button class="k-button" (click)="manage('single-cancel')">Cancel</button>
+    <button *ngIf="singleEditConfirm" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
+      [disabled]="!Attribute.dirty">Confirm</button>
+    <button *ngIf="singleAdd" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
+      [disabled]="!Add.valid">Confirm</button>
+  </kendo-dialog-actions>
+
+  <kendo-dialog-actions id="attribute-group-confirm" *ngIf="groupSelect">
+    <button class="k-button" (click)="manage('group-cancel')">Cancel</button>
+    <button *ngIf="groupEditConfirm" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('group-confirm')"
+      [disabled]="!Attributes.dirty">Confirm</button>
+    <button *ngIf="groupCreate" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('group-confirm')"
+      [disabled]="!Create.valid">Confirm</button>
+  </kendo-dialog-actions>
+</kendo-dialog>

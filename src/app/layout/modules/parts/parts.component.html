@@ -1,0 +1,61 @@
+<kendo-dialog class="parts" title="Manage Parts" (close)="parts('cancel')">
+  <input kendoTextBox class="form-control parts-input" (keyup)="selectionChange($event)" [placeholder]="'Search an Attribute'"
+    *ngIf="showAttributes" />
+
+  <div class="row padding">
+    <table class="table table-hover" *ngIf="showAttributes">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Type</td>
+          <td>Upload</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!dataAttribute.length">
+          <td colspan="3" class="text-center">No Results Found</td>
+        </tr>
+
+        <tr *ngFor="let x of dataAttribute; let i = index;">
+          <td>
+            <a (click)="manageAttribute(x)">{{ x.value }}</a>
+          </td>
+          <td>
+            <span>{{ x.type }}</span>
+          </td>
+          <td>
+            <span>{{ x.file }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 *ngIf="showFeatures">Selected Attribute: {{ selectedAttribute.value }}</h3>
+
+    <!--Show Attribute Features-->
+    <table class="table table-hover" *ngIf="showFeatures">
+      <thead>
+        <tr>
+          <td></td>
+          <td>Name</td>
+          <td>Details</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let x of attributeFeatures; let i = index;">
+          <td>
+            <span *ngIf="selectedAttribute.multiselect"><input type="checkbox" (click)="selectedFeature(x)" /></span>
+            <span *ngIf="!selectedAttribute.multiselect"><input type="radio" name="feature" (click)="selectedFeature(x, 'radio')" /></span>
+          </td>
+          <td>{{ x.name }}</td>
+          <td>{{ x.details }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <kendo-dialog-actions *ngIf="showFeatures">
+    <button class="k-button" kendoButton (click)="parts('main')">Back</button>
+    <button class="k-button k-primary" dir="ltr" primary="true" (click)="parts('add')" [disabled]="!featureList.length">Add</button>
+  </kendo-dialog-actions>
+</kendo-dialog>

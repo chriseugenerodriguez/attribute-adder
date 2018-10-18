@@ -1,0 +1,82 @@
+<kendo-dialog class="filter" title="Filter" (close)="filter('cancel')">
+  <div class="row">
+    <table class="table format" [formGroup]="oData" (ngSubmit)="createSingleStep()">
+      <thead>
+        <tr>
+          <td width="200px">Attribute</td>
+          <td width="125px">Operator</td>
+          <td width="200px">Value</td>
+          <td *ngIf="oDatas.controls['items'].length > 0">Group</td>
+          <td width="50px"></td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <kendo-dropdownlist [data]="attributes" formControlName="attribute"></kendo-dropdownlist>
+          </td>
+          <td>
+            <kendo-dropdownlist [data]="operator" formControlName="operator"></kendo-dropdownlist>
+          </td>
+          <td><input class="form-control" formControlName="value" /></td>
+          <td *ngIf="oDatas.controls['items'].length">
+            <kendo-dropdownlist [data]="groupData" formControlName="group"></kendo-dropdownlist>
+          </td>
+          <td><button class="fa fa-plus" (click)="createSingleStep(oData.value) || oData.reset()" [disabled]="!oData.valid"></button></td>
+        </tr>
+      </tbody>
+    </table>
+    <table [formGroup]="oDatas" *ngIf="oDatas.controls['items'].length" class="table table-hover sp created">
+      <thead>
+        <tr>
+          <td width="200px">Attribute</td>
+          <td width="150px">Operator</td>
+          <td>Value</td>
+          <td width="150px"><span *ngIf="oDatas.controls['items'].length > 1">Group</span></td>
+          <td width="50px"></td>
+        </tr>
+      </thead>
+      <tbody formArrayName="items">
+        <tr *ngFor="let x of oDatas.controls['items'].controls; let i = index;" [formGroupName]="i">
+          <td>
+            <a (click)="change('attribute', i)" *ngIf="eNew[i].attribute === eEdit[i].attribute">{{ x.value.Attribute }}</a>
+            <span *ngIf="eNew[i].attribute !== eEdit[i].attribute">
+              <kendo-dropdownlist [data]="attributes" formControlName="Attribute"></kendo-dropdownlist>
+              <i (click)="change('attribute', i)" class="fa fa-check cursor"></i>
+            </span>
+          </td>
+          <td>
+            <a (click)="change('operator', i)" *ngIf="eNew[i].operator === eEdit[i].operator" class="operator">{{ x.value.Operator }}</a>
+            <span *ngIf="eNew[i].operator !== eEdit[i].operator">
+              <kendo-dropdownlist [data]="operator" formControlName="Operator"></kendo-dropdownlist>
+              <i (click)="change('operator', i)" class="fa fa-check cursor"></i>
+            </span>
+          </td>
+          <td>
+            <a (click)="change('value', i)" *ngIf="eNew[i].value === eEdit[i].value">{{ x.value.Value }}</a>
+            <span *ngIf="eNew[i].value !== eEdit[i].value">
+              <input class="form-control" formControlName="Value" />
+              <button [attr.disabled]="oDatas.get('items').value[i].Value ? null: ''" (click)="change('value', i)"
+                class="fa fa-check"></button>
+            </span>
+          </td>
+          <td *ngIf="i === 0"></td>
+          <td *ngIf="i > 0">
+            <a (click)="change('group', i)" *ngIf="eNew[i].group === eEdit[i].group">{{ x.value.Group }}</a>
+            <span *ngIf="eNew[i].group !== eEdit[i].group">
+              <kendo-dropdownlist [data]="groupData" formControlName="Group"></kendo-dropdownlist>
+              <i (click)="change('group', i)" class="fa fa-check cursor"></i>
+            </span>
+          </td>
+          <td>
+            <button class="fa fa-times" (click)="removeSingleStep(i)"></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <kendo-dialog-actions>
+    <button class="k-button" kendoButton (click)="filter('cancel')">Cancel</button>
+    <button class="k-button k-primary" dir="ltr" (click)="filter('update')" primary="true" [disabled]="(!oDatas.get('items').valid || !oDatas.controls['items'].length)">Update</button>
+  </kendo-dialog-actions>
+</kendo-dialog>

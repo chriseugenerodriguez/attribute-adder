@@ -1,0 +1,119 @@
+// -----------------------------------------------------------------------------
+// This file contains all styles related to the button component.
+// -----------------------------------------------------------------------------
+
+//  BEM - Block Element Modifier
+//  This is how our code is structured. Please follow this layout and format.
+//  More Info: https://css-tricks.com/bem-101/
+//
+//  .steps {
+//	    &__item {		
+//		    &--first {}
+//		    &--last {}
+//		    &--active {}
+//		    &--done {}
+//	    }
+//	    &__link {}
+//  }
+phx-app {
+
+	.btn {
+		@include border-radius(3px);
+		background: #e7e9ec;
+		border-color: #adb1b8 #a2a6ac #8d9096;
+		background: -webkit-linear-gradient(top, #f7f8fa, #e7e9ec);
+		background: linear-gradient(to bottom, #f7f8fa, #e7e9ec);
+		color: #111;
+		font-size: 13px;
+		line-height: 32px;
+		padding: 0 10px;
+
+		&:hover {
+			color: #111;
+			background: #e0e3e9;
+			background: -webkit-linear-gradient(top, #e7eaf0, #d9dce1);
+			background: linear-gradient(to bottom, #e7eaf0, #d9dce1);
+			border-color: #a2a6ac #979aa1 #82858a;
+		}
+
+		&:focus,
+		&:active {
+			box-shadow: 0 0 3px 2px rgba(228, 121, 17, .5);
+			outline: none;
+			border-color: #e77600;
+		}
+	}
+
+	.options {
+		.btn {
+			@include font-size(13px);
+			background: #fff;
+			border-color: #e1e4e8;
+			padding: 0px 14px;
+			line-height: 32px;
+			font-weight: 600;
+			color: #586069;
+
+			&:hover {
+				background: #fafafa;
+			}
+		}
+	}
+
+	.right {
+		float: right;
+	}
+
+	.dropdown-menu {
+		@include border-radius(3px);
+		@include box-shadow(0 3px 12px rgba(27, 31, 35, 0.15));
+		@include font-size(12px);
+		color: #586069;
+		border: 1px solid rgba(27, 31, 35, 0.15);
+
+		li {
+
+			a {
+				display: block;
+				padding: 8px 8px 8px 10px;
+				overflow: hidden;
+				color: inherit;
+				cursor: pointer;
+				border-bottom: 1px solid #eaecef;
+			}
+
+			&:last-child {
+
+				a {
+					border-bottom: none;
+				}
+			}
+		}
+	}
+
+	.dropdown-toggle {
+		font-weight: 600;
+		color: #444d56;
+		background-color: #eff3f6;
+		background-image: -webkit-linear-gradient(270deg, #fafbfc 0%, #f6f6f6 90%);
+		background-image: linear-gradient(-180deg, #fafbfc 0%, #eff3f6 90%);
+	}
+
+	.btn-primary {
+		background: #f0c14b;
+		border-color: #a88734 #9c7e31 #846a29;
+		box-shadow: 0 1px 0 rgba(255, 255, 255, .4) inset;
+		background: -webkit-linear-gradient(top, #f7dfa5, #f0c14b);
+		background: linear-gradient(to bottom, #f7dfa5, #f0c14b);
+
+		&:hover,
+		&:active,
+		&:focus {
+			background: #f2c861 !important;
+			background: -webkit-linear-gradient(top, #f5d78e, #eeb933) !important;
+			background: linear-gradient(to bottom, #f5d78e, #eeb933) !important;
+			border-color: #a88734 #9c7e31 #7e6429 !important;
+			color: #111 !important;
+		}
+	}
+}

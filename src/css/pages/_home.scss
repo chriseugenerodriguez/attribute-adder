@@ -1,0 +1,92 @@
+// -----------------------------------------------------------------------------
+// This file contains all styles related to the header of the site/application.
+// -----------------------------------------------------------------------------
+//  BEM - Block Element Modifier
+//  This is how our code is structured. Please follow this layout and format.
+//  More Info: https://css-tricks.com/bem-101/
+//
+//  .steps {
+//	    &__item {		
+//		    &--first {}
+//		    &--last {}
+//		    &--active {}
+//		    &--done {}
+//	    }
+//	    &__link {}
+//  }
+home {
+  background: #fff;
+    display: block;
+    position: relative;
+
+  .app-viewer {
+    padding: 30px;
+
+    .actions {
+      margin-bottom: 20px;
+
+      #filter {
+        i {
+          margin-left: 20px;
+        }
+      }
+    }
+
+    .k-grid {
+      @include border-radius(3px);
+      background-color: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      thead {
+        tr {
+          &[kendogridfilterrow] {
+            th {
+              padding: 4px;
+            }
+          }
+          th {
+            padding-top: 13px;
+            padding-bottom: 13px;
+            &[kendogridfiltercell] {
+              display: table-cell;
+            }
+            a {
+              color: #333;
+            }
+            button {
+              &:not(.k-clear-button-visible) {
+                [title="Clear"] {
+                  display: none;
+                }
+              }
+            }
+          }
+          td {
+            .k-button:not(.k-clear-button-visible) {
+              display: none;
+            }
+            .k-filtercell.k-filtercell-boolean .k-filtercell-wrapper {
+              padding-right: 0px;
+            }
+          }
+        }
+      }
+      tbody {
+        tr {
+          background: #fff;
+          td {
+            border: none;
+            border-bottom: 1px solid #e1e4e8;
+          }
+          &:last-child {
+            td {
+              border: none;
+            }
+          }
+        }
+      }
+      a {
+        color: #0275d8;
+      }
+    }
+  } 
+}
