@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 export let api = '';
 export let localbase = 'assets/json/';
-export let apibase = 'https://phx-pim-api-dev.azurewebsites.net/phenomenex/pim/1.0.0/';
+export let apibase = '';
 export let headers = new Headers({ 'Content-Type': 'application/json' });
 export let options = new RequestOptions({ headers: headers });
 
