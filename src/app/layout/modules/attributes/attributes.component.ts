@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import { FileRestrictions, SuccessEvent, UploadEvent, FileInfo } from '@progress/kendo-angular-upload';
+import { FileRestrictions, SuccessEvent, UploadEvent, FileInfo, FileState } from '@progress/kendo-angular-upload';
 
 import { FormArray, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { AlertComponent } from 'ngx-bootstrap/alert';
@@ -24,7 +24,6 @@ export class AttributesComponent implements OnInit {
 	inputs = [];
 	inputsAttributes = [];
 	items: any[] = [];
-	stepRow: number;
 	confirm: boolean;
 	type: Array<{ key: number, value: string }>;
 	unit: Array<{ key: number, value: string }>;
@@ -67,30 +66,26 @@ export class AttributesComponent implements OnInit {
 	groupEdit: boolean;
 	groupCreate: boolean;
 	groupEditConfirm: boolean;
+	groupEditStep: number;
 
 	// File UPLOAD
-	uploadFile: Array<FileInfo> = [];
-	uploadUrl: string = 'https://phx-appmanager-api-dev.azurewebsites.net/phenomenex/appManager/1.0.0/applications/';
+	uploadFiles: Array<FileInfo> = [];
+	uploadUrl: string = this.api.apibase;
 	uploadRemoveUrl: string = '';
 
 	constructor(private api: API, private fb: FormBuilder) {
-		this.stepRow = 0;
 		this.editStep = null;
-
-		this.reset();
 
 		// FORM GROUPS
 		this.Create = this.fb.group({
-			Name: ['', Validators.required],
-			Multiselect: [''],
-			Type: ['', Validators.required],
-			File: [''],
-			Unit: ['']
+			Name: [null, Validators.required],
+			Multiselect: [false],
+			TypeKey: [null, Validators.required],
+			UOMKey: [null]
 		});
 
-		this.Add = this.fb.group({
-			Key: ['']
-		});
+		// ADD CHILD
+		this.Add = this.fb.group({});
 
 		// FORM GROUPS - ARRAY
 		this.Attributes = this.fb.group({
@@ -104,46 +99,40 @@ export class AttributesComponent implements OnInit {
 
 		this.stepAttribute = <FormArray>this.Attribute.controls['items'];
 		this.stepAttributes = <FormArray>this.Attributes.controls['items'];
+
+		this.reset();
 	}
 
 	ngOnInit(): void {
-		this.api.get('./uom/list.json', 'image').subscribe(r => {
-			this.unit = r;
+		this.api.get('./uom/list.json', 'unitsofmeasure').subscribe(r => {
+			this.unit = r['value'];
 		});
 
-		this.api.get('./attributes/attribute-type.json', 'image').subscribe(r => {
-			this.type = r;
-		});
-
-		this.api.get('./export/attributes.json', 'image').subscribe(r => {
-			this.inputs = r;
-			this.inputsAttributes = r;
-
-			for (const x of r) {
-				this.stepAttributes.push(this.createGroupAttribute(
-					x.key,
-					x.value,
-					x.multiselect,
-					x.type,
-					x.file,
-					x.unit
-				));
-			}
-		});
+		this.api.get('./uom/type.json', 'attributevalues/gettypes').subscribe(r => {
+			this.type = r['value']
+		})
 	}
 
 	private resetSearch() {
 		this.stepAttributes.controls = [];
 
 		for (const x of this.inputsAttributes) {
-			this.stepAttributes.push(this.createGroupAttribute(
-				x.key,
-				x.value,
-				x.multiselect,
-				x.type,
-				x.file,
-				x.unit
-			));
+			if (x.UOMKey != null) {
+				this.stepAttributes.push(this.createGroupAttribute(
+					x.AttributeID,
+					x.Name,
+					x.Multiselect,
+					x.AttributeType.Value,
+					x.UnitOfMeasure.Value
+				));
+			} else {
+				this.stepAttributes.push(this.createGroupAttribute(
+					x.AttributeID,
+					x.Name,
+					x.Multiselect,
+					x.AttributeType.Value
+				));
+			}
 		}
 	}
 
@@ -156,18 +145,46 @@ export class AttributesComponent implements OnInit {
 		this.groupSelect = false;
 		this.groupCreate = false;
 
+		this.editStep = null;
+
 		// SINGLE
+		this.singleAttribute = false;
 		this.singleView = false;
 		this.singleSelect = false;
 		this.singleDelete = false;
 		this.singleEdit = false;
 		this.singleAdd = false;
+
+		this.stepAttributes.controls.splice(0);
+
+		this.api.get('./export/attributes.json', 'Attributes?$expand=AttributeType,UnitOfMeasure').subscribe(r => {
+			this.inputs = r['value'];
+			this.inputsAttributes = r['value'];
+
+			for (const x of r['value']) {
+				if (x.UOMKey != null) {
+					this.stepAttributes.push(this.createGroupAttribute(
+						x.AttributeID,
+						x.Name,
+						x.Multiselect,
+						x.AttributeType.Value,
+						x.UnitOfMeasure.Value
+					));
+				} else {
+					this.stepAttributes.push(this.createGroupAttribute(
+						x.AttributeID,
+						x.Name,
+						x.Multiselect,
+						x.AttributeType.Value
+					));
+				}
+			}
+		});
 	}
 
 	// Manage different view
 	manage(status) {
 		this.confirm = false;
-		this.resetSearch();
 
 		if (status === 'close') {
 			this.open.emit(false);
@@ -197,60 +214,77 @@ export class AttributesComponent implements OnInit {
 			this.singleEdit = !this.singleEdit;
 		}
 		if (status === 'single-back') {
-			this.editStep = null;
-			this.singleAdd = false;
-			this.singleEdit = false;
-			this.singleSelect = false;
-			this.singleView = false;
-			this.singleAttribute = false;
-
-			this.groupAttribute = true;
-			this.groupView = true;
-			this.groupSelect = false;
+			this.reset();
 		}
 
 		if (status === 'single-cancel') {
-			this.groupAttribute = false;
-
-			this.singleAttribute = false;
-			this.singleSelect = false;
-			this.singleEdit = false;
-			this.singleView = false;
-			this.singleDelete = false;
-			this.singleAdd = false;
-			this.editStep = null;
-
-			this.Add.reset();
-			this.stepAttribute.reset();
-
+			this.reset();
 			this.manageSingleUnit(this.singleSelectedValue);
 
 		}
 		if (status === 'single-confirm') {
 			if (this.singleAttribute) {
-				this.api.put('attributes', this.Attribute.value).subscribe(
-					(r) => {
-						if (r) {
-							this.editStep = null;
+				const a = this.Attribute.controls['items'].value[this.editStep];
+				const b = a.AttributeID;
 
-							this.alert('success', r['statusText'])
-						}
+				if (this.singleSelectedValue['TypeKey'] === 'String') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueString';
+				}
+				if (this.singleSelectedValue['TypeKey'] === 'Numeric') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueNumeric';
+				}
+				if (this.singleSelectedValue['TypeKey'] === 'File') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueFile';
+				}
+
+				delete a.AttributeValueID;
+				delete a.AttributeID;
+
+				this.api.patch('attributevalues(' + b + ')', a).subscribe(
+					(r) => {
+						this.alert('success', '"' + a.Name + '"' + ' has been successfully updated');
+						this.reset();
 					},
 					(err) => {
-						this.alert('error', err['status'] + ' - ' + err['statusText'])
+						this.reset();
+
+						if (err.status === 409) {
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
 					}
 				)
 			}
 
 			if (this.singleAdd) {
-				this.api.post('attributes', this.Add.value).subscribe(
+				const a = this.Add.value;
+				a.AttributeID = this.singleSelectedValue['AttributeID'];
+
+				if (this.singleSelectedValue['TypeKey'] === 'String') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueString';
+				}
+				if (this.singleSelectedValue['TypeKey'] === 'Numeric') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueNumeric';
+				}
+				if (this.singleSelectedValue['TypeKey'] === 'File') {
+					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueFile';
+				}
+
+				this.api.post('attributevalues', a).subscribe(
 					(r) => {
 						if (r) {
-							this.alert('success', r['statusText'])
+							this.alert('success', '"' + this.singleSelectedValue['Name'] + '"' + ' has been successfully created');
+							this.reset();
 						}
 					},
 					(err) => {
-						this.alert('error', err['status'] + ' - ' + err['statusText'])
+						if (err.status === 409) {
+
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
 					}
 				)
 			}
@@ -278,26 +312,56 @@ export class AttributesComponent implements OnInit {
 		}
 		if (status === 'group-confirm') {
 			if (this.groupEditConfirm) {
-				this.api.post('attributes', this.Attributes.value).subscribe(
+				const a = Object.create(this.Attributes.controls['items'].value[this.editStep]);
+
+				for (const i of this.unit) {
+					if (i['Value'] === a.UOMKey) {
+						a.UOMKey = i['Key']
+					}
+				}
+
+				for (const i of this.type) {
+					if (i['Value'] === a.TypeKey) {
+						a.TypeKey = i['Key'];
+					}
+				}
+
+				this.api.patch('attributes(' + this.groupEditStep + ')', a).subscribe(
 					(r) => {
-						if (r) {
-							this.alert('success', r['statusText'])
-						}
+						this.alert('success', '"' + a.Name + '"' + ' has been successfully updated');
+						this.reset();
 					},
 					(err) => {
-						this.alert('error', err['status'] + ' - ' + err['statusText'])
+						this.reset();
+
+						if (err.status === 409) {
+							const b = JSON.parse(err._body);
+
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
 					}
 				)
 			}
 			if (this.groupCreate) {
-				this.api.put('attributes', this.Create.value).subscribe(
+				let a = this.Create.value;
+
+				a['@odata.type'] = '#Phx.ProductManager.Data.Entities.Attribute';
+
+				this.api.post('attributes', a).subscribe(
 					(r) => {
 						if (r) {
-							this.alert('success', r['statusText'])
+							this.alert('success', '"' + this.Create.value.Name + '"' + ' has been successfully created');
+							this.reset();
 						}
 					},
 					(err) => {
-						this.alert('error', err['status'] + ' - ' + err['statusText'])
+						if (err.status === 409) {
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
 					}
 				)
 			}
@@ -331,94 +395,103 @@ export class AttributesComponent implements OnInit {
 	}
 
 	// MANAGE
-	createSingleAttribute(step?: number, name?: string, details?: string, number?: number, url?: string, extension?: string) {
-		console.log(extension);
-		if (step !== null) {
-			this.stepRow = step;
-		} else {
-			this.stepRow = this.stepRow + 1;
-		}
-
+	createSingleStringAttribute(AttributeValueID?: number, AttributeID?: number, StringValue?: string, StringDetail?: string) {
 		return this.fb.group({
-			Step: [this.stepRow],
-			Name: [name],
-			Details: [details],
-			Number: [number],
-			Url: [url],
-			Ext: [extension]
+			AttributeValueID: [AttributeValueID],
+			AttributeID: [AttributeID],
+			StringValue: [StringValue],
+			StringDetail: [StringDetail],
 		})
 	}
 
-	createGroupAttribute(step?: number, name?: string, multiselect?: boolean, type?: string, file?: boolean, unit?: string) {
-		if (step !== null) {
-			this.stepRow = step;
-		} else {
-			this.stepRow = this.stepRow + 1;
-		}
+	createSingleNumericAttribute(AttributeValueID?: number, AttributeID?: number, NumericValue?: string, Detail?: string) {
+		return this.fb.group({
+			AttributeValueID: [AttributeValueID],
+			AttributeID: [AttributeID],
+			NumericValue: [NumericValue],
+			Detail: [Detail],
+		})
+	}
+
+	createSingleFileAttribute(AttributeValueID?: number, AttributeID?: number, FileValue?: string, Source?: string, Extension?: string) {
+		return this.fb.group({
+			AttributeValueID: [AttributeValueID],
+			AttributeID: [AttributeID],
+			FileValue: [FileValue],
+			Source: [Source],
+			Ext: [Extension],
+		})
+	}
+
+	createGroupAttribute(id?: number, name?: string, multiselect?: boolean, type?: string, unit?: string) {
 
 		return this.fb.group({
-			Step: [this.stepRow],
+			AttributeID: [id],
 			Name: [name],
 			Multiselect: [multiselect],
-			Type: [type],
-			File: [file],
-			Unit: [unit]
+			TypeKey: [type],
+			UOMKey: [unit]
 		})
 	}
 
-	removeGroupStep(idx: number) {
+	removeGroupStep(idx, i) {
+		const a = idx.AttributeID;
+
 		if (this.groupDelete === true) {
-
-			this.api.delete('attributes', idx).subscribe(
+			this.api.delete('attributes(' + a + ')').subscribe(
 				(r) => {
-					if (r) {
-						this.stepAttributes.removeAt(idx);
-						this.groupDelete = false;
-						this.groupEdit = false;
+					this.stepAttributes.removeAt(i);
+					this.groupDelete = false;
+					this.groupEdit = false;
 
-						this.alert('success', r['statusText'])
-					}
+					this.alert('success', '"' + idx.Name + '" has been successfully deleted');
 				},
 				(err) => {
-					this.alert('error', err['status'] + ' - ' + err['statusText'])
+					this.alert('error', err['status'] + ' - ' + err['statusText']);
 				}
 			)
 		}
 	}
 
-	removeSingleStep(idx: number) {
+	removeSingleStep(idx, i) {
+		const a = idx.AttributeValueID;
+
 		if (this.singleDelete === true) {
-
-			this.api.put('attributes', idx).subscribe(
+			this.api.delete('attributevalues(' + a + ')').subscribe(
 				(r) => {
-					if (r) {
-						this.stepAttribute.removeAt(idx);
+					this.stepAttribute.removeAt(i);
+					this.singleDelete = false;
+					this.singleEdit = false;
 
-						this.alert('success', r['statusText'])
+					if (this.singleSelectedValue['TypeKey'] === 'String') {
+						this.alert('success', '"' + idx.StringDetail + '" has been successfully deleted');
+					}
+					if (this.singleSelectedValue['TypeKey'] === 'Numeric') {
+						this.alert('success', '"' + idx.NumericValue + '" has been successfully deleted');
+					}
+					if (this.singleSelectedValue['TypeKey'] === 'File') {
+						this.alert('success', '"' + idx.FileValue + '" has been successfully deleted');
 					}
 				},
 				(err) => {
-
-					this.alert('error', err['status'] + ' - ' + err['statusText'])
+					this.alert('error', err['status'] + ' - ' + err['statusText']);
 				}
 			)
 		}
 	}
 
 	typeChange(val) {
-		this.attributeFile = val === 2 ? true : false;
-		this.attributeUnit = val === 1 ? true : false;
+		this.attributeFile = val === 1 ? true : false;
+		this.attributeUnit = val === 2 ? true : false;
 	}
 
 	manageSingleUnit(attr) {
 		const a = attr;
-
 		if (a.asyncValidator !== undefined) {
 			this.singleSelectedValue = a.value;
 		} else {
 			this.singleSelectedValue = a;
 		}
-
 
 		this.groupAttribute = false;
 		this.groupView = false;
@@ -431,88 +504,116 @@ export class AttributesComponent implements OnInit {
 		this.stepAttribute.controls.splice(0);
 
 		// TYPES
-		if (this.singleSelectedValue['Type'] === 'number') {
-			this.attributeString = false;
-		} else {
+		if (this.singleSelectedValue['TypeKey'] === 'String') {
 			this.attributeString = true;
 		}
-
-		console.log(this.singleSelectedValue, this.attributeString);
-
-		if (!this.attributeString) {
-			if (!this.Add.value['Number']) {
-				this.Add.addControl('Number', new FormControl('', Validators.required));
-			}
-			this.Add.removeControl('File');
-			this.Add.removeControl('Name');
-			this.Add.removeControl('Details');
-		} else {
-			if (!this.singleSelectedValue['File']) {
-				if (!this.Add.value['Name'] && !this.Add.value['Details']) {
-					this.Add.addControl('Name', new FormControl('', Validators.required));
-					this.Add.addControl('Details', new FormControl('', Validators.required));
-				}
-				this.Add.removeControl('File');
-				this.Add.removeControl('Number');
-			} else {
-				if (!this.Add.value['File']) {
-					this.Add.addControl('File', new FormControl('', Validators.required));
-				}
-				this.Add.removeControl('Name');
-				this.Add.removeControl('Number');
-				this.Add.removeControl('Details');
-			}
+		if (this.singleSelectedValue['TypeKey'] !== 'String') {
+			this.attributeString = false;
 		}
 
-		if (!this.singleSelectedValue['File']) {
-			this.api.get('./attributes/data.json', 'attributes/' + attr.key).subscribe(r => {
-				this.attributeFeatures = r;
-
-				for (const x of r) {
-					this.stepAttribute.push(this.createSingleAttribute(
-						x.step,
-						x.name,
-						x.details,
-						x.number
+		if (!this.attributeString) {
+			if (!this.Add.value['NumericValue']) {
+				this.Add.addControl('NumericValue', new FormControl('', Validators.required));
+			}
+			this.Add.removeControl('File');
+			this.Add.removeControl('StringValue');
+			this.Add.removeControl('StringDetail');
+		}
+		if (this.singleSelectedValue['TypeKey'] !== 'File') {
+			if (!this.Add.value['StringValue'] && !this.Add.value['StringDetail']) {
+				this.Add.addControl('StringValue', new FormControl('', Validators.required));
+				this.Add.addControl('StringDetail', new FormControl('', Validators.required));
+			}
+			this.Add.removeControl('File');
+			this.Add.removeControl('NumericValue');
+		} else {
+			console.log(this.singleSelectedValue);
+			this.uploadUrl = this.uploadUrl + 'attributevalues(' + this.singleSelectedValue['AttributeID'] + ')/uploadfile';
+			if (!this.Add.value['File']) {
+				this.Add.addControl('File', new FormControl('', Validators.required));
+			}
+			this.Add.removeControl('StringValue');
+			this.Add.removeControl('NumericValue');
+			this.Add.removeControl('StringDetail');
+		}
+		// tslint:disable-next-line:max-line-length
+		this.api.get('./attributes/data-file.json', 'Attributes(' + this.singleSelectedValue['AttributeID'] + ')/getAttributeValues').subscribe(r => {
+			if (this.singleSelectedValue['TypeKey'] === 'String') {
+				for (const x of r['value']) {
+					this.stepAttribute.push(this.createSingleStringAttribute(
+						x.AttributeID,
+						x.AttributeValueID,
+						x.StringValue,
+						x.StringDetail
 					));
 				}
-			});
-		} else {
-			this.api.get('./attributes/data-file.json', 'attributes').subscribe(r => {
-				this.attributeFeatures = r;
-				console.log(r);
-				for (const x of r) {
-					console.log(x.extension);
-					this.stepAttribute.push(this.createSingleAttribute(
-						x.step,
-						x.name,
-						x.uid,
-						x.url,
+			}
+			if (this.singleSelectedValue['TypeKey'] === 'Numeric') {
+				for (const x of r['value']) {
+					this.stepAttribute.push(this.createSingleNumericAttribute(
+						x.AttributeID,
+						x.AttributeValueID,
+						x.NumericValue,
+						x.Detail
+					));
+				}
+			}
+			if (this.singleSelectedValue['TypeKey'] === 'File') {
+				for (const x of r['value']) {
+					this.stepAttribute.push(this.createSingleFileAttribute(
+						x.AttributeID,
+						x.AttributeValueID,
+						x.ImageValue,
+						x.Source,
 						x.extension
 					));
 				}
-			});
-		}
+			}
+		});
 	}
 
-
-	// TODO: write function to remove file
-	public removeUploadFile(file) {
-		console.log('remove ' + file);
-	}
-
-	// Response from a success upload
-	public uploadSuccess(e: SuccessEvent) {
-		let r = e.response;
-		this.uploadFile = r['body'];
-	}
 
 	public uploadEvent(e: UploadEvent) {
+		const l = e.files[0];
+		e.headers = e.headers.append('x-fileid', l['uid']);
+		e.headers = e.headers.append('x-fileid-size', JSON.stringify(l['size']));
 		// e.headers = e.headers.append('Authorization', 'Bearer ' + this.AS.getToken());
+
+		const up = {
+			extension: l['extension'],
+			name: l['rawFile'].name,
+			size: l['size'],
+			uid: l['uid'],
+			url: 'https://phenomenexdev.blob.core.windows.net/attributevaluefiles/' + l['uid'] + l['extension']
+		};
+		this.uploadFiles.push(up);
+
+		this.Add.setValue(this.uploadFiles);
 	}
 
-	editGroupStep(i) {
+	public removeUploadFile(upload, uid: string) {
+		for (const x of this.uploadFiles) {
+			if (x.uid === uid) {
+				this.uploadFiles.splice(this.uploadFiles.indexOf(x), 1);
+				break;
+			}
+		}
+
+		this.Add.setValue(this.uploadFiles);
+		this.Add.markAsDirty();
+	}
+
+	public format(state: FileState): boolean {
+		return (state === FileState.Uploaded || state === 1) ? true : false;
+	}
+
+	public download(b) {
+		window.open('https://phenomenexdev.blob.core.windows.net/attributevaluefiles/' + b['uid'] + b['extension'], '_blank');
+	}
+
+	editGroupStep(v, i) {
 		this.editStep = i;
+		this.groupEditStep = v;
 		this.singleSelect = false;
 
 		this.groupView = false;
@@ -521,8 +622,10 @@ export class AttributesComponent implements OnInit {
 		this.groupEditConfirm = true;
 	}
 
-	editSingleStep(i) {
+	editSingleStep(v, i) {
 		this.editStep = i;
+		this.groupEditStep = v;
+
 		this.singleView = false;
 		this.singleSelect = true;
 		this.singleEdit = false;

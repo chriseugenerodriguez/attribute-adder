@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
 import { API, ILookup } from '../../../core';
 
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 
 import 'rxjs/Rx';
 import { AlertComponent } from 'ngx-bootstrap/alert';
@@ -34,6 +34,7 @@ export class ExportsComponent implements OnInit {
 	addI: Array<object> = [];
 	removeI: Array<object> = [];
 	addClicked = [];
+	addClickedAX = [];
 	removeClicked = [];
 
 	inputs: Array<object> = [];
@@ -54,7 +55,17 @@ export class ExportsComponent implements OnInit {
 	images: Array<object> = [];
 	exports: Array<object> = [];
 
+	// FORM ARRAY
+	ProfileAttributes: any;
+	ProfilePartFields: any;
+
+	// TYPE
+	type: string;
+	update: boolean;
+
+
 	public defaultAttributes: { text: string, value: number } = { text: 'Attributes', value: 1 };
+	public selectedAttributes: { text: string, value: number } = { text: 'Attributes', value: 1 };
 
 	public attributes: Array<{ text: string, value: number }> = [
 		{ text: 'AX', value: 2 },
@@ -67,61 +78,98 @@ export class ExportsComponent implements OnInit {
 
 		this.default = true;
 
-		// FORM GROUPS
-		this.Export = this.fb.group({
-			Accounttype: [''],
-			Currencytype: ['', Validators.required],
-			Imagetype: ['', Validators.required],
-			Exporttype: ['', Validators.required],
-			Attributes: ['', Validators.required],
+		this.Save = this.fb.group({
+			ProfileName: [null, Validators.required]
 		});
 
-		this.Save = this.fb.group({
-			Value: ['', Validators.required]
+		// FORM GROUPS
+		this.Export = this.fb.group({
+			ProfileId: [''],
+			PriceListKey: ['', Validators.required],
+			ImageTypeKey: ['', Validators.required],
+			ExportFormatKey: ['', Validators.required],
+			ProfileAttributes: this.fb.array([], Validators.required),
+			ProfilePartFields: this.fb.array([], Validators.required),
+		});
+
+		// FORM ARRAY
+		this.ProfileAttributes = <FormArray>this.Export.controls['ProfileAttributes'];
+		this.ProfilePartFields = <FormArray>this.Export.controls['ProfilePartFields'];
+
+		// DROPDOWN INITIAL
+		this.api.get('./export/attributes.json', 'Attributes').subscribe(r => {
+			this.type = 'Attributes';
+			this.inputs = r['value'];
 		});
 	}
 
 	ngOnInit(): void {
 
-		// EXPORT -  move later
-		this.api.get('./export/account.json', 'image').subscribe(r => {
-			this.accountType = r;
-			this.accountTypeData = r;
+		this.Export.statusChanges.subscribe((r) => {
+			console.log(this.Export.value);
+		})
+
+		// EXPORT
+		this.api.get('./export/account.json', 'profiles').subscribe(r => {
+			this.accountType = r['value'];
+			this.accountTypeData = r['value'];
 		});
 
-		this.api.get('./export/image.json', 'image').subscribe(r => {
-			this.imageType = r;
-			this.imageTypeData = r;
+		this.api.get('./export/image.json', 'profiles/GetImageTypes').subscribe(r => {
+			this.imageType = r['value'];
+			this.imageTypeData = r['value'];
 		});
 
-		this.api.get('./export/export.json', 'export').subscribe(r => {
-			this.exportType = r;
-			this.exportTypeData = r;
+		this.api.get('./export/export.json', 'profiles/GetExportFormats').subscribe(r => {
+			this.exportType = r['value'];
+			this.exportTypeData = r['value'];
 		});
 
-		this.api.get('./export/price.json', 'price').subscribe(r => {
-			this.priceType = r;
-			this.priceTypeData = r;
-		});
-
-		this.api.get('./export/attributes.json', 'image').subscribe(r => {
-			this.inputs = r;
+		this.api.get('./export/price.json', 'profiles/GetCurrencies').subscribe(r => {
+			this.priceType = r['value'];
+			this.priceTypeData = r['value'];
 		});
 	}
 
 	attributeChange(v) {
-		if (v.text === 'AX') {
-			this.api.get('./export/attributes.json', 'image').subscribe(r => {
-				this.inputs = r;
+		this.selectedAttributes = v;
+		this.type = v.text;
+		if (this.type === 'AX') {
+			this.api.get('./export/attributes.json', 'parts/getfields').subscribe(r => {
+				this.inputs = r['value'];
+
+				const index = this.inputs.filter((val) => {
+					for (let i = 0; i < this.outputs.length; i++) {
+						if (val['FieldName'] === this.outputs[i]['FieldName']) {
+							return false;
+						}
+					}
+					return true;
+				});
+
+				this.inputs = index;
 			});
 		} else {
-			this.api.get('./export/attributes.json', 'image').subscribe(r => {
-				this.inputs = r;
+			this.api.get('./export/attributes.json', 'Attributes').subscribe(r => {
+				this.inputs = r['value'];
+
+				const index = this.inputs.filter((val) => {
+					for (let i = 0; i < this.outputs.length; i++) {
+						if (val['Name'] === this.outputs[i]['Name']) {
+							return false;
+						}
+					}
+					return true;
+				});
+
+				this.inputs = index;
 			});
 		}
 	}
 
 	export(status) {
+		this.update = false;
+
 		if (status === 'cancel') {
 			this.open.emit(false);
 
@@ -131,103 +179,228 @@ export class ExportsComponent implements OnInit {
 		if (status === 'create-cancel') {
 			this.new = false;
 			this.default = true;
-
-			this.Save.reset();
 		}
 
 		if (status === 'confirm') {
-			this.api.post('./export/attributes.json', 'export/' + this.Export.value).subscribe(r => {
-				const blob = new Blob([r], { type: 'text/csv' });
-				const url = window.URL.createObjectURL(blob);
-				window.open(url);
-			});
+			const attr = [];
+			const ax = [];
+
+			for (const x of this.outputs) {
+				if ('PartFieldID' in x) {
+					ax.push({
+						'ProfileId': this.Export['ProfileId'], 'FieldName': x['FieldName']
+					});
+				} else {
+					attr.push({ 'ProfileId': this.Export['ProfileId'], 'AttributeID': x['AttributeID'] });
+				}
+			}
+
+			// META
+			this.Export.value['ProfileAttributes'] = attr;
+			this.Export.value['ProfilePartFields'] = ax;
+
+			if (!this.Export.value.ProfileId) {
+				delete this.Export.value.ProfileId;
+			}
+
+			const a = { 'profile': this.Export.value };
+
+
+			this.api.post('profiles/Default.exportparts', a).subscribe(
+				(r) => {
+					const blob = new Blob([r], { type: 'text/csv' });
+					const url = window.URL.createObjectURL(blob);
+					window.open(url);
+				},
+				(err) => {
+					this.alert('error', err['status'] + ' - ' + err['statusText'])
+				}
+			);
 		}
 
 		if (status === 'save') {
-			if (this.Export.controls['Accounttype'].value) {
-				if (status === 'save-confirm') {
-					this.api.put('export/' + this.Export.value.id, this.Export.value).subscribe(
-						(r) => {
-							if (r) {
-								this.new = false;
-								this.default = true;
-								this.Export.reset();
+			this.new = true;
+			this.default = false;
 
-								this.alert('success', r['statusText'])
-							}
-						},
-						(err) => {
-							this.alert('error', err['status'] + ' - ' + err['statusText'])
-						})
-				}
-			} else {
-				this.new = true;
-				this.default = false;
+			if (this.Export.controls['ProfileId'].value) {
+				this.update = true;
 			}
 		}
 
 		if (status === 'create') {
+			const attr = [];
+			const ax = [];
 
-			const a = {
-				'Title': this.Save.value,
-				'Form': this.Export.value
+			for (const x of this.outputs) {
+				if ('PartFieldID' in x) {
+					ax.push({
+						'ProfileId': this.Export['ProfileId'], 'FieldName': x['FieldName']
+					});
+				} else {
+					attr.push({ 'ProfileId': this.Export['ProfileId'], 'AttributeID': x['AttributeID'] });
+				}
 			}
 
-			this.api.post('export/', a).subscribe(
-				(r) => {
-					if (r) {
-						this.new = false;
-						this.default = true;
-						this.Export.reset();
+			// META
+			this.Export.value['@odata.context'] = 'http://www.phenomenex.com/$metadata#Profiles/$entity';
 
-						this.alert('success', r['statusText'])
+			this.Export.value['ProfileNameValue'] = this.Save.value.ProfileName;
+			this.Export.value['ProfileAttributes'] = attr;
+			this.Export.value['ProfilePartFields'] = ax;
+
+			if (this.Export.controls['ProfileId'].value) {
+				this.api.put('profiles', this.Export.value).subscribe(
+					(r) => {
+						if (r) {
+							this.new = false;
+							this.default = true;
+							this.Export.reset();
+
+							this.alert('success', '"' + this.Save.value.ProfileName + '" has been successfully deleted');
+						}
+					},
+					(err) => {
+						if (err.status === 409) {
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique name.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
 					}
-				},
-				(err) => {
-					this.alert('error', err['status'] + ' - ' + err['statusText'])
-				})
-		}
+				)
+			} else {
+				delete this.Export.value.ProfileId;
 
+				this.api.post('profiles', this.Export.value).subscribe(
+					(r) => {
+						if (r) {
+							this.new = false;
+							this.default = true;
+							this.Export.reset();
+
+							this.alert('success', '"' + this.Save.value.ProfileName + '" has been successfully deleted');
+						}
+					},
+					(err) => {
+						if (err.status === 409) {
+							this.alert('error', err['status'] + ' - ' + 'This is not a unique name.');
+						} else {
+							this.alert('error', err['status'] + ' - ' + err['statusText'])
+						}
+					}
+				)
+			}
+		}
 	}
 
 	addItems() {
 		if (this.addI.length > 1) {
 			for (let i = 0; i < this.addI.length; i++) {
 				const d = this.addI;
-				this.outputs.push(d[i]);
-				this.Export.controls['Attributes'].setValue(this.outputs);
 
-				const index = this.inputs.filter(function (el) {
-					return el['value'] !== d[i]['value'].toString();
-				});
+				if ('PartFieldID' in d[i]) {
+					d[i]['type'] = 'AX';
+					this.outputs.push(d[i]);
 
-				this.inputs = index;
+					this.outputs.forEach((v) => {
+						if (v['type'] === 'AX' && v['PartFieldID']) {
+							const a = this.ProfilePartFields.value.find(r => r === v['FieldName']);
+
+							if (!a) {
+								this.ProfilePartFields.push(new FormControl(v['FieldName']));
+							}
+						}
+					})
+
+					const index = this.inputs.filter((el) => {
+						return el['FieldName'] !== d[i]['FieldName'];
+					});
+
+					this.inputs = index;
+				} else {
+					d[i]['type'] = 'PIM';
+					this.outputs.push(d[i]);
+
+					this.outputs.forEach((v) => {
+						if (v['type'] === 'PIM' && v['Name']) {
+							const a = this.ProfileAttributes.value.find(r => r === v['AttributeID']);
+
+							if (!a) {
+								this.ProfileAttributes.push(new FormControl(v['AttributeID']));
+							}
+						}
+					})
+
+					const index = this.inputs.filter((el) => {
+						return el['Name'] !== d[i]['Name'];
+					});
+
+					this.inputs = index;
+				}
 			}
 		} else {
 			const d = this.addI[0];
 
-			this.outputs.push(d);
-			this.Export.controls['Attributes'].setValue(this.outputs);
+			if ('PartFieldID' in d) {
+				d['type'] = 'AX';
 
-			const index = this.inputs.filter(function (el) {
-				return el['value'] !== d['value'].toString();
-			});
+				this.outputs.push(d);
 
-			this.inputs = index;
-		}
+				this.outputs.forEach((v) => {
+					if (v['type'] === 'AX' && v['PartFieldID']) {
+						const a = this.ProfilePartFields.value.find(r => r === v['FieldName']);
 
-		this.addI = [];
-		this.addItemsActive = false;
-	}
+						if (!a) {
+							this.ProfilePartFields.push(new FormControl(v['FieldName']));
+						}
+					}
+				})
 
-	addItem(i) {
-		if (this.addI !== []) {
-			this.addItemsActive = true;
-			if (this.addI.indexOf(i) === -1) {
-				this.addI.push(i);
+				const index = this.inputs.filter((el) => {
+					return el['FieldName'] !== d['FieldName'];
+				});
+
+				this.inputs = index;
+			} else {
+				d['type'] = 'PIM';
+
+				this.outputs.push(d);
+
+				this.outputs.forEach((v) => {
+					if (v['type'] === 'PIM' && v['Name']) {
+						const a = this.ProfileAttributes.value.find(r => r === v['AttributeID']);
+
+						if (!a) {
+							this.ProfileAttributes.push(new FormControl(v['AttributeID']));
+						}
+					}
+				})
+
+				const index = this.inputs.filter((el) => {
+					return el['AttributeID'] !== d['AttributeID'];
+				});
+
+				this.inputs = index;
 			}
 		}
 
+		this.addI = [];
+		this.addClicked = [];
+		this.addClickedAX = [];
+		this.addItemsActive = false;
+	}
+
+	private _addItem(i) {
+		if (this.addI.indexOf(i) === -1) {
+			this.addI.push(i);
+		} else {
+			this.addI.splice(this.addI.indexOf(i), 1);
+		}
+
+		if (this.addI.length !== 0) {
+			this.addItemsActive = true;
+		} else {
+			this.addItemsActive = false;
+		}
 	}
 
 	removeItems() {
@@ -235,33 +408,65 @@ export class ExportsComponent implements OnInit {
 			for (let i = 0; i < this.removeI.length; i++) {
 				const d = this.removeI;
 
-				this.inputs.push(d[i]);
+				if ('PartFieldID' in d[i]) {
+					this.inputs.push(d[i]);
 
-				const index = this.outputs.filter(function (el) {
-					return el['value'] !== d[i]['value'].toString();
-				});
+					const a = this.ProfilePartFields.value.findIndex(r => r === d[i]['FieldName'])
+					this.ProfilePartFields.removeAt(a, 1);
 
-				this.outputs = index;
-				this.Export.controls['Attributes'].setValue(this.outputs);
+					const index = this.outputs.filter(function (el) {
+						return el['FieldName'] !== d[i]['FieldName'];
+					});
+
+					this.outputs = index;
+				} else {
+					this.inputs.push(d[i]);
+
+					const a = this.ProfileAttributes.value.findIndex(r => r === d[i]['AttributeID'])
+					this.ProfileAttributes.removeAt(a, 1);
+
+					const index = this.outputs.filter((el) => {
+						return el['AttributeID'] !== d[i]['AttributeID'];
+					});
+
+					this.outputs = index;
+				}
 			}
 		} else {
 			const d = this.removeI[0];
 
-			this.inputs.push(d);
+			if ('PartFieldID' in d) {
+				this.inputs.push(d);
 
-			const index = this.outputs.filter(function (el) {
-				return el['value'] !== d['value'].toString();
-			});
+				const a = this.ProfilePartFields.value.findIndex(r => r === d['FieldName'])
+				this.ProfilePartFields.removeAt(a, 1);
 
-			this.outputs = index;
-			this.Export.controls['Attributes'].setValue(this.outputs);
+				const index = this.outputs.filter(function (el) {
+					return el['FieldName'] !== d['FieldName'];
+				});
+
+				this.outputs = index;
+
+			} else {
+				this.inputs.push(d);
+
+				const a = this.ProfileAttributes.value.findIndex(r => r === d['AttributeID'])
+				this.ProfileAttributes.removeAt(a, 1);
+
+				const index = this.outputs.filter((el) => {
+					return el['AttributeID'] !== d['AttributeID'];
+				});
+
+				this.outputs = index;
+			}
 		}
 
+		this.removeClicked = [];
 		this.removeI = [];
 		this.removeItemsActive = false;
 	}
 
-	removeItem(i) {
+	private _removeItem(i) {
 		if (this.removeI !== []) {
 			this.removeItemsActive = true;
 			if (this.removeI.indexOf(i) === -1) {
@@ -271,15 +476,48 @@ export class ExportsComponent implements OnInit {
 	}
 
 	accountChange(i) {
-		const a = i['key'];
+		const a = i.ProfileID;
 
-		this.api.get('./export/attributes.json', 'export/' + a).subscribe(r => {
+		this.api.get('./export/attributes.json', 'profiles(' + a + ')').subscribe(r => {
+			this.Export.controls['PriceListKey'].setValue(r['PriceListKey']);
+			this.Export.controls['ExportFormatKey'].setValue(r['ExportformatKey']);
+			this.Export.controls['ImageTypeKey'].setValue(r['ImageTypeKey']);
+			this.Save.controls['ProfileName'].setValue(r['ProfileNameValue']);
 
-			this.Export.controls['Currencytype'].setValue(r['Currencytype']);
-			this.Export.controls['Imagetype'].setValue(r['Imagetype']);
+			this.update = true;
+		});
 
-			this.outputs = r['Inputs'];
-			this.outputs = r['Outputs'];
+		this.api.get('./export/attributes.json', 'profiles(' + a + ')/getselectedattributes').subscribe(r => {
+			const b = r['AxAttributes'];
+			const c = r['PimAttributes'];
+			const d = [];
+
+			this.api.get('./export/attributes.json', 'parts/getfields').subscribe(res => {
+				for (const re of res['value']) {
+					for (const each of b) {
+						if (re.FieldName === each) {
+							re.type = 'AX';
+							d.push(re);
+							this.ProfilePartFields.push(new FormControl(re.PartFieldID));
+						}
+					}
+				};
+			});
+			this.api.get('./export/attributes.json', 'Attributes').subscribe(res => {
+				for (const re of res['value']) {
+					for (const each of c) {
+						if (re.AttributeID === each) {
+							re.type = 'PIM';
+							d.push(re);
+							this.ProfileAttributes.push(new FormControl(re.Name));
+						}
+					}
+				}
+
+				this.attributeChange(this.selectedAttributes);
+			});
+
+			this.outputs = d;
 		});
 	}
 
@@ -292,21 +530,5 @@ export class ExportsComponent implements OnInit {
 
 	close(a: AlertComponent) {
 		this.message = this.message.filter((i) => i !== a);
-	}
-
-	accountTypeFilter(val) {
-		this.accountTypeData = this.accountType.filter((s) => s.Value.toLowerCase().indexOf(val.toLowerCase()) !== -1);
-	}
-
-	priceTypeFilter(val) {
-		this.priceTypeData = this.priceType.filter((s) => s.Value.toLowerCase().indexOf(val.toLowerCase()) !== -1);
-	}
-
-	imageTypeFilter(val) {
-		this.imageTypeData = this.imageType.filter((s) => s.Value.toLowerCase().indexOf(val.toLowerCase()) !== -1);
-	}
-
-	exportTypeFilter(val) {
-		this.exportTypeData = this.exportType.filter((s) => s.Value.toLowerCase().indexOf(val.toLowerCase()) !== -1);
 	}
 }

@@ -1,33 +1,41 @@
 <kendo-dialog class="export" title="Export Parts" (close)="export('cancel')">
   <ng-container *ngFor="let i of message">
-    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true"> {{ i.value }} </alert>
+    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true"> {{ i.value
+      }} </alert>
   </ng-container>
   <div *ngIf="default" [formGroup]="Export">
     <div class="row">
       <div class="col col-md-3">
-        <kendo-combobox class="form-control" [data]="accountTypeData" textField="value" valueField="key" placeholder="Load Profile"
-          valuePrimitive="true" suggest="true" filterable="true" (selectionChange)="accountChange($event)" (filterChange)="accountTypeFilter($event)" formControlName="Accounttype"></kendo-combobox>
+        <kendo-combobox class="form-control" [data]="accountTypeData" textField="ProfileNameValue" valueField="ProfileID"
+          placeholder="Load Profile" valuePrimitive="true" suggest="true" filterable="true" (selectionChange)="accountChange($event)"
+          formControlName="ProfileId"></kendo-combobox>
       </div>
       <div class="col col-md-3">
-        <kendo-combobox class="form-control" [data]="priceTypeData" textField="value" valueField="key" placeholder="Choose Currency"
-          valuePrimitive="true" suggest="true" filterable="true" (filterChange)="priceTypeFilter($event)" formControlName="Currencytype"></kendo-combobox>
+        <kendo-combobox class="form-control" [data]="priceTypeData" textField="Value" valueField="Key" placeholder="Choose Currency"
+          valuePrimitive="true" suggest="true" filterable="true" formControlName="PriceListKey"></kendo-combobox>
       </div>
       <div class="col col-md-3">
-        <kendo-combobox class="form-control" [data]="imageTypeData" textField="value" valueField="key" placeholder="Select Image Type"
-          valuePrimitive="true" suggest="true" filterable="true" (filterChange)="imageTypeFilter($event)" formControlName="Imagetype"></kendo-combobox>
+        <kendo-combobox class="form-control" [data]="imageTypeData" textField="Value" valueField="Key" placeholder="Select Image Type"
+          valuePrimitive="true" suggest="true" filterable="true" formControlName="ImageTypeKey"></kendo-combobox>
       </div>
       <div class="col col-md-3">
-        <kendo-combobox class="form-control" [data]="exportTypeData" textField="value" valueField="key" placeholder="Export Format"
-          valuePrimitive="true" suggest="true" filterable="true" (filterChange)="exportTypeFilter($event)" formControlName="Exporttype"></kendo-combobox>
+        <kendo-combobox class="form-control" [data]="exportTypeData" textField="Value" valueField="Key" placeholder="Export Format"
+          valuePrimitive="true" suggest="true" filterable="true" formControlName="ExportFormatKey"></kendo-combobox>
       </div>
     </div>
     <div class="row format">
       <div class="col col-md-5">
-        <kendo-dropdownlist [defaultItem]="defaultAttributes" [data]="attributes" [textField]="'text'" [valueField]="'value'" 
-        (selectionChange)="attributeChange($event)"></kendo-dropdownlist>
+        <kendo-dropdownlist [defaultItem]="defaultAttributes" [data]="attributes" [textField]="'text'" [valueField]="'value'"
+          (selectionChange)="attributeChange($event)"></kendo-dropdownlist>
         <ul class="input">
-          <!-- <li *ngFor="let i of attributes" [ngClass]="{'active': $event.target.active}" (click)="add($event.target.value)">{{ i.name }}</li> -->
-          <li [ngClass]="{'active':addClicked[l]}" (click)="addItem(i); addClicked[l] = (addClicked[l]? false :true )" *ngFor="let i of inputs; let l = index;">{{ i.value }}</li>
+          <ng-container *ngIf="this.type === 'AX'">
+            <li [ngClass]="{'active':addClickedAX[l]}" (click)="_addItem(i); addClickedAX[l] = (addClickedAX[l]? false :true )"
+              *ngFor="let i of inputs; let l = index;">{{ i.FieldName }}</li>
+          </ng-container>
+          <ng-container *ngIf="this.type !== 'AX'">
+            <li [ngClass]="{'active':addClicked[l]}" (click)="_addItem(i); addClicked[l] = (addClicked[l]? false :true )"
+              *ngFor="let i of inputs; let l = index;">{{ i.Name }}</li>
+          </ng-container>
         </ul>
       </div>
       <div class="col col-md-2 arrows">
@@ -41,26 +49,33 @@
       <div class="col col-md-5">
         <h3>Export</h3>
         <ul class="output">
-          <li [ngClass]="{'active':removeClicked[l]}" (click)="removeItem(i); removeClicked[l] = (removeClicked[l]? false :true )"
-            *ngFor="let i of outputs; let l = index;">{{ i.value }}</li>
+          <li [ngClass]="{'active':removeClicked[l]}" (click)="_removeItem(i); removeClicked[l] = (removeClicked[l]? false :true )"
+            *ngFor="let i of outputs; let l = index;">
+            <span *ngIf="i.type == 'PIM'">
+              <span class="marker">{{i.type}}</span> {{ i.Name }}
+            </span>
+            <span *ngIf="i.type == 'AX'">
+              <span class="marker">{{i.type}}</span> {{ i.FieldName }}
+            </span>
+          </li>
         </ul>
       </div>
-    </div>    
-  </div>
-  
-  <div *ngIf="new" [formGroup]="Save">
-    <input class="form-control" formControlName="Value" placeholder="Name new profile." />
+    </div>
   </div>
 
+  <div *ngIf="new" [formGroup]="Save">
+    <input class="form-control" formControlName="ProfileName" placeholder="Name new profile." />
+  </div>
 
   <kendo-dialog-actions *ngIf="default">
     <button class="k-button" kendoButton (click)="export('cancel')">Cancel</button>
-    <button class="k-button" dir="ltr" primary="true" (click)="export('save')" [disabled]="!Export.dirty">Save</button>
+    <button class="k-button" dir="ltr" primary="true" (click)="export('save')" [disabled]="!Export.valid && !Save.dirty">Save</button>
     <button class="k-button k-primary" dir="ltr" primary="true" (click)="export('confirm')" [disabled]="!Export.valid">Export</button>
   </kendo-dialog-actions>
 
   <kendo-dialog-actions *ngIf="new">
-      <button class="k-button" kendoButton (click)="export('create-cancel')">Cancel</button>
-      <button class="k-button k-primary" dir="ltr" primary="true" (click)="export('create')" [disabled]="!Save.valid">Create</button>
-    </kendo-dialog-actions>
+    <button class="k-button" kendoButton (click)="export('create-cancel')">Cancel</button>
+    <button *ngIf="!update" class="k-button k-primary" dir="ltr" primary="true" (click)="export('create')" [disabled]="!Save.valid">Create</button>
+    <button *ngIf="update" class="k-button k-primary" dir="ltr" primary="true" (click)="export('create')" [disabled]="!Save.dirty">Update</button>
+  </kendo-dialog-actions>
 </kendo-dialog>

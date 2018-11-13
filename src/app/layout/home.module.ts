@@ -1,8 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { FormsModule } from '@angular/forms';
 
 // SHARED
 import { HomeComponent } from './home.component';
@@ -20,6 +19,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FilterModule } from './modules/filter/filter.module';
 import { PartsModule } from './modules/parts/parts.module';
 
+// PIPE
+import { KeysPipeModule } from 'app/core';
+
 @NgModule({
 	declarations: [
 		HomeComponent
@@ -36,7 +38,10 @@ import { PartsModule } from './modules/parts/parts.module';
 
 		// MODULES
 		PartsModule,
-		FilterModule
+		FilterModule,
+
+		// PIPE
+		KeysPipeModule
 	],
 	exports: [
 		GridModule

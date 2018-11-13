@@ -12,6 +12,7 @@ import { DropDownsModule } from '@progress/kendo-angular-dropdowns';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+// ALERT
 import { AlertModule } from 'ngx-bootstrap/alert';
 
 @NgModule({
@@ -27,7 +28,9 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		FormsModule,
 		ReactiveFormsModule,
 		RouterModule,
-		AlertModule
+
+		// ALERT
+		AlertModule.forRoot()
 	],
 	exports: [
 		ExportsComponent

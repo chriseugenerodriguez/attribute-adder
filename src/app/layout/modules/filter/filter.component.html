@@ -13,12 +13,14 @@
       <tbody>
         <tr>
           <td>
-            <kendo-dropdownlist [data]="attributes" formControlName="attribute"></kendo-dropdownlist>
+            <kendo-dropdownlist (selectionChange)="attributeSelected($event)" [data]="attributes" formControlName="attribute"
+              textField="FieldName" valueField="FieldName" [valuePrimitive]="true"></kendo-dropdownlist>
           </td>
           <td>
-            <kendo-dropdownlist [data]="operator" formControlName="operator"></kendo-dropdownlist>
+            <kendo-dropdownlist [data]="operator" formControlName="operator" textField="Description" valueField="Value"
+              [valuePrimitive]="true"></kendo-dropdownlist>
           </td>
-          <td><input class="form-control" formControlName="value" /></td>
+          <td><input #type class="form-control" formControlName="value" /></td>
           <td *ngIf="oDatas.controls['items'].length">
             <kendo-dropdownlist [data]="groupData" formControlName="group"></kendo-dropdownlist>
           </td>
@@ -26,6 +28,12 @@
         </tr>
       </tbody>
     </table>
+
+    <ng-container *ngFor="let i of message">
+      <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true" style="margin:0 20px;display:block;">
+        {{ i.value }} </alert>
+    </ng-container>
+
     <table [formGroup]="oDatas" *ngIf="oDatas.controls['items'].length" class="table table-hover sp created">
       <thead>
         <tr>
@@ -39,34 +47,42 @@
       <tbody formArrayName="items">
         <tr *ngFor="let x of oDatas.controls['items'].controls; let i = index;" [formGroupName]="i">
           <td>
-            <a (click)="change('attribute', i)" *ngIf="eNew[i].attribute === eEdit[i].attribute">{{ x.value.Attribute }}</a>
+            {{ x.value.Attribute }}
+            <!-- <a (click)="change('attribute', i)" *ngIf="eNew[i].attribute === eEdit[i].attribute">{{ x.value.Attribute
+              }}</a>
             <span *ngIf="eNew[i].attribute !== eEdit[i].attribute">
-              <kendo-dropdownlist [data]="attributes" formControlName="Attribute"></kendo-dropdownlist>
+              <kendo-dropdownlist [data]="attributes" formControlName="Attribute" textField="FieldName" valueField="FieldName"
+                [valuePrimitive]="true"></kendo-dropdownlist>
               <i (click)="change('attribute', i)" class="fa fa-check cursor"></i>
-            </span>
+            </span> -->
           </td>
           <td>
-            <a (click)="change('operator', i)" *ngIf="eNew[i].operator === eEdit[i].operator" class="operator">{{ x.value.Operator }}</a>
+            {{ x.value.Operator }}
+            <!-- <a (click)="change('operator', i)" *ngIf="eNew[i].operator === eEdit[i].operator" class="operator">{{
+              x.value.Operator }}</a>
             <span *ngIf="eNew[i].operator !== eEdit[i].operator">
-              <kendo-dropdownlist [data]="operator" formControlName="Operator"></kendo-dropdownlist>
+              <kendo-dropdownlist [data]="operator" formControlName="Operator" textField="Description" valueField="Value"
+                [valuePrimitive]="true"></kendo-dropdownlist>
               <i (click)="change('operator', i)" class="fa fa-check cursor"></i>
-            </span>
+            </span> -->
           </td>
           <td>
-            <a (click)="change('value', i)" *ngIf="eNew[i].value === eEdit[i].value">{{ x.value.Value }}</a>
+            {{ x.value.Value }}
+            <!-- <a (click)="change('value', i)" *ngIf="eNew[i].value === eEdit[i].value">{{ x.value.Value }}</a>
             <span *ngIf="eNew[i].value !== eEdit[i].value">
               <input class="form-control" formControlName="Value" />
               <button [attr.disabled]="oDatas.get('items').value[i].Value ? null: ''" (click)="change('value', i)"
                 class="fa fa-check"></button>
-            </span>
+            </span> -->
           </td>
           <td *ngIf="i === 0"></td>
           <td *ngIf="i > 0">
-            <a (click)="change('group', i)" *ngIf="eNew[i].group === eEdit[i].group">{{ x.value.Group }}</a>
+            {{ x.value.Group }}
+            <!-- <a (click)="change('group', i)" *ngIf="eNew[i].group === eEdit[i].group">{{ x.value.Group }}</a>
             <span *ngIf="eNew[i].group !== eEdit[i].group">
               <kendo-dropdownlist [data]="groupData" formControlName="Group"></kendo-dropdownlist>
               <i (click)="change('group', i)" class="fa fa-check cursor"></i>
-            </span>
+            </span> -->
           </td>
           <td>
             <button class="fa fa-times" (click)="removeSingleStep(i)"></button>

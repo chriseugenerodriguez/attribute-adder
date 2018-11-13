@@ -1,61 +1,131 @@
 <kendo-dialog class="parts" title="Manage Parts" (close)="parts('cancel')">
-  <input kendoTextBox class="form-control parts-input" (keyup)="selectionChange($event)" [placeholder]="'Search an Attribute'"
+  <ng-container *ngFor="let i of message">
+    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true"> {{ i.value
+      }} </alert>
+  </ng-container>
+
+  <input kendoTextBox class="form-control parts-input" (keyup)="selectionclick($event)" [placeholder]="'Search an Attribute'"
     *ngIf="showAttributes" />
 
   <div class="row padding">
     <table class="table table-hover" *ngIf="showAttributes">
       <thead>
         <tr>
+          <td *ngIf="part.length === 1" width="50"></td>
           <td>Name</td>
           <td>Type</td>
-          <td>Upload</td>
+          <td>UOM</td>
         </tr>
       </thead>
-      <tbody>
+      <tbody *ngIf="attributeFeatures">
         <tr *ngIf="!dataAttribute.length">
           <td colspan="3" class="text-center">No Results Found</td>
         </tr>
 
         <tr *ngFor="let x of dataAttribute; let i = index;">
-          <td>
-            <a (click)="manageAttribute(x)">{{ x.value }}</a>
+          <td *ngIf="part.length === 1">
+            <ng-container *ngFor="let key of count | keys">
+              <span class="parts-tooltip" *ngIf="x.AttributeID == key.key"> {{ key.value }}</span>
+            </ng-container>
           </td>
           <td>
-            <span>{{ x.type }}</span>
+            <a (click)="manageAttribute(x)">{{ x.Name }}</a>
           </td>
           <td>
-            <span>{{ x.file }}</span>
+            <span>{{ x.AttributeType.Value }}</span>
+          </td>
+          <td>
+            <span *ngIf="x.UOMKey">{{ x.UnitOfMeasure.Value }}</span>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <h3 *ngIf="showFeatures">Selected Attribute: {{ selectedAttribute.value }}</h3>
+    <h3 *ngIf="showFeatures">Selected Attribute: {{ selectedAttribute.Name }}</h3>
 
-    <!--Show Attribute Features-->
     <table class="table table-hover" *ngIf="showFeatures">
-      <thead>
-        <tr>
-          <td></td>
-          <td>Name</td>
-          <td>Details</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let x of attributeFeatures; let i = index;">
-          <td>
-            <span *ngIf="selectedAttribute.multiselect"><input type="checkbox" (click)="selectedFeature(x)" /></span>
-            <span *ngIf="!selectedAttribute.multiselect"><input type="radio" name="feature" (click)="selectedFeature(x, 'radio')" /></span>
-          </td>
-          <td>{{ x.name }}</td>
-          <td>{{ x.details }}</td>
-        </tr>
-      </tbody>
+      <!-- Attribute Type String -->
+      <ng-container *ngIf="selectedAttribute.AttributeType.Value == 'String'">
+        <thead>
+          <tr>
+            <td></td>
+            <td>Name</td>
+            <td>Details</td>
+          </tr>
+        </thead>
+        <tbody *ngIf="attributeFeatures">
+          <tr *ngIf="!attributeFeatures.length">
+            <td colspan="3" class="text-center">No attributes were added to this attribute</td>
+          </tr>
+          <tr *ngFor="let x of attributeFeatures; let i = index;">
+            <td>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+            </td>
+            <td>{{ x.StringValue }}</td>
+            <td>{{ x.StringDetail }}</td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!-- Attribute Type Number -->
+      <ng-container *ngIf="selectedAttribute.AttributeType.Value == 'Numeric'">
+        <thead>
+          <tr>
+            <td></td>
+            <td>Value</td>
+            <td>Details</td>
+          </tr>
+        </thead>
+        <tbody *ngIf="attributeFeatures">
+          <tr *ngIf="!attributeFeatures.length">
+            <td colspan="3" class="text-center">No attributes were added to this attribute</td>
+          </tr>
+          <tr *ngFor="let x of attributeFeatures; let i = index;">
+            <td>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+            </td>
+            <td>{{ x.NumericValue }}</td>
+            <td>{{ x.Detail }}</td>
+          </tr>
+        </tbody>
+      </ng-container>
+
+      <!-- Attribute Type File -->
+      <ng-container *ngIf="selectedAttribute.AttributeType.Value == 'File'">
+        <thead>
+          <tr>
+            <td></td>
+            <td>Name</td>
+            <td>Source</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!attributeFeatures.length">
+            <td colspan="3" class="text-center">No attributes were added to this attribute</td>
+          </tr>
+          <tr *ngFor="let x of attributeFeatures; let i = index;">
+            <td>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
+                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+            </td>
+            <td>{{ x.FileValue }}</td>
+            <td>{{ x.Source }}</td>
+          </tr>
+        </tbody>
+      </ng-container>
     </table>
   </div>
 
   <kendo-dialog-actions *ngIf="showFeatures">
     <button class="k-button" kendoButton (click)="parts('main')">Back</button>
-    <button class="k-button k-primary" dir="ltr" primary="true" (click)="parts('add')" [disabled]="!featureList.length">Add</button>
+    <button class="k-button k-primary" dir="ltr" primary="true" (click)="parts('add')" [disabled]="!featureList">Add</button>
   </kendo-dialog-actions>
 </kendo-dialog>

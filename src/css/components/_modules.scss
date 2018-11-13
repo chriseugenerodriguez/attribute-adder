@@ -172,6 +172,17 @@
         margin-bottom: 20px;
       }
 
+      .parts-tooltip {
+        @include font-size(11px);
+        @include border-radius(20px);
+        display: block;
+        width: 20px;
+        height: 18px;
+        background: #eee;
+        text-align: center;
+        line-height: 18px;
+      }
+
       .table {
         margin-bottom: 16px;
 
@@ -205,6 +216,7 @@
         border: 1px solid #ddd;
         padding: 10px;
         height: 275px;
+        overflow-y: scroll;
 
         li {
           margin-bottom: 5px;
@@ -219,6 +231,17 @@
 
           &:last-child {
             margin-bottom: 0px;
+          }
+
+          .marker {
+            @include font-size(9px);
+            @include border-radius(4px);
+            background: #555;
+            color:#fff;
+            padding: 2px 5px;
+            margin-right: 3px;
+            top: -1px;
+            position: relative;
           }
         }
       }

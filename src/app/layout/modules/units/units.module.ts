@@ -9,6 +9,7 @@ import { DropDownsModule } from '@progress/kendo-angular-dropdowns';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+// ALERT
 import { AlertModule } from 'ngx-bootstrap/alert';
 
 @NgModule({
@@ -23,8 +24,10 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		DropDownsModule,
 		FormsModule,
 		ReactiveFormsModule,
+		RouterModule,
+
+		// ALERT
 		AlertModule.forRoot(),
-		RouterModule
 	],
 	exports: [
 		UnitsComponent

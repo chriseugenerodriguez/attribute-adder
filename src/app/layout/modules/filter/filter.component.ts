@@ -1,7 +1,8 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Renderer2, ElementRef, ViewChild } from '@angular/core';
 
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
-import { IAttribute, API } from '../../../core/index';
+import { API } from '../../../core/index';
+import { AlertComponent } from 'ngx-bootstrap/alert';
 
 @Component({
 	selector: 'filter',
@@ -9,8 +10,14 @@ import { IAttribute, API } from '../../../core/index';
 })
 export class FilterComponent implements OnInit {
 
+	// INPUT
+	@ViewChild('type') input: ElementRef;
+
 	// TOGGLE
 	@Output() open = new EventEmitter<boolean>(true);
+
+	// MESSAGE
+	message: Array<object> = [];
 
 	// SINGLE
 	oData: FormGroup;
@@ -28,7 +35,7 @@ export class FilterComponent implements OnInit {
 	operator: Array<string> = [];
 	groupData: Array<string> = ['And', 'Or'];
 
-	@Output() grid = new EventEmitter<object>();
+	@Output() grid = new EventEmitter<any>(true);
 
 	// EDIT
 	eEdit: any;
@@ -36,7 +43,7 @@ export class FilterComponent implements OnInit {
 	eConfirm: true;
 
 
-	constructor(private api: API, private fb: FormBuilder) {
+	constructor(private api: API, private fb: FormBuilder, private renderer: Renderer2) {
 		// SINGLE
 		this.oData = this.fb.group({
 			attribute: ['', Validators.required],
@@ -54,13 +61,23 @@ export class FilterComponent implements OnInit {
 
 	ngOnInit() {
 		// FILTERS
-		this.api.get('./filter/attributes.json', 'image').subscribe(r => {
-			this.attributes = r.map(i => i.value);
+		this.api.get('./filter/attributes.json', '/parts/getfields').subscribe(r => {
+			this.attributes = r['value'];
 		});
 
-		this.api.get('./filter/operator.json', 'image').subscribe(r => {
-			this.operator = r.map(i => i.value);
+		this.api.get('./filter/operator.json', '/parts/getsearchfilteroperators').subscribe(r => {
+			this.operator = r['value'];
 		});
+	}
+
+	attributeSelected(v) {
+		const a = v.Type;
+
+		if (a === 'Numeric') {
+			this.renderer.setAttribute(this.input.nativeElement, 'type', 'number');
+		} else {
+			this.renderer.setAttribute(this.input.nativeElement, 'type', 'text');
+		}
 	}
 
 	private filter(status) {
@@ -72,28 +89,44 @@ export class FilterComponent implements OnInit {
 		}
 
 		if (status === 'update') {
-			this.open.emit(false);
-
 			const a = this.oDatas.value.items;
-			const b = '$filter=';
+			const b = '?$filter=';
 			const c = [{}];
 			const d = [{}];
-			let e = '';
+			let e = 'parts';
+
+
 			for (let i = 0; i < a.length; i++) {
-				c[i] = `${a[i].Attribute}` + ' ' + `${a[i].Operator}` + ' ' + `${a[i].Value}`;
+
+				this.attributes.forEach((v) => {
+					if (v['FieldName'] === a[i].Attribute) {
+						if (v['Type'] === 'Numeric') {
+							c[i] = `${a[i].Attribute}` + ' ' + `${a[i].Operator}` + ' ' + `${a[i].Value}`;
+						}
+						if (v['Type'] === 'String') {
+							// tslint:disable-next-line:quotemark
+							c[i] = `${a[i].Attribute}` + " " + `${a[i].Operator}` + " " + "'" + `${a[i].Value}` + "'";
+						}
+					}
+				});
+
 				if (a[i].Group === 'And') {
-					d[i] = 'and ' + c[i]
+					d[i] = ' And ' + c[i]
 				} else if (a[i].Group === 'Or') {
-					d[i] = 'or ' + c[i]
+					d[i] = ' Or ' + c[i]
 				} else {
 					d[i] = c[i];
 				}
 			};
-			e = b + d.join(' ')
+			e = e + b + d.join('');
 
-			this.api.post('grid.json', e).subscribe(r => {
-				this.grid.emit(r);
-			});
+			this.api.get('grid.json', e + '&$select=PartID,Brand,Description').subscribe(r => {
+				this.grid.emit(r['value']);
+				this.open.emit(false);
+			},
+			(err) => {
+				this.alert('error', err['status'] + ' - ' + err['statusText']);
+			})
 		}
 	}
 
@@ -124,6 +157,10 @@ export class FilterComponent implements OnInit {
 			this.eNew.push({ attribute: true, operator: true, value: true, group: true });
 		}
 		this.stepDatas.push(this.createSingleAttribute(v.attribute, v.operator, v.value, v.group));
+
+		// RESET
+		this.renderer.setAttribute(this.input.nativeElement, 'type', 'text');
+
 	}
 
 	createSingleAttribute(a?: string, b?: string, c?: string, d?: string) {
@@ -158,5 +195,16 @@ export class FilterComponent implements OnInit {
 		if (a === 'group') {
 			this.eNew[b].group = !this.eNew[b].group;
 		}
+	}
+	
+	alert(a, b) {
+		this.message.push({
+			type: a,
+			value: b
+		})
+	}
+
+	close(a: AlertComponent) {
+		this.message = this.message.filter((i) => i !== a);
 	}
 }

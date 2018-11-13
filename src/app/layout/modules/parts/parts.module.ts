@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 // SHARED
 import { PartsComponent } from './parts.component';
@@ -10,6 +11,12 @@ import { DialogModule } from '@progress/kendo-angular-dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InputsModule } from '@progress/kendo-angular-inputs';
 import { RouterModule } from '@angular/router';
+
+// KEYS
+import { KeysPipeModule } from 'app/core';
+
+// ALERT
+import { AlertModule } from 'ngx-bootstrap/alert';
 
 @NgModule({
 	declarations: [
@@ -21,7 +28,14 @@ import { RouterModule } from '@angular/router';
 		DialogModule,
 		BrowserAnimationsModule,
 		InputsModule,
-		RouterModule
+		RouterModule,
+		FormsModule,
+
+		// ALERT
+		AlertModule.forRoot(),
+
+		// PIPE
+		KeysPipeModule
 	],
 	exports: [
 		PartsComponent

@@ -12,32 +12,22 @@
 
   <div class="row">
     <div class="col-md-12">
-      <kendo-grid [selectable]="true" [data]="gridData" [pageSize]="pageSize" [skip]="skip" [pageable]="true" [sortable]="true"
-        (pageChange)="pageChange($event)">
+      <kendo-grid (detailExpand)="moreInfo($event)" [selectable]="true" [data]="gridData" [pageSize]="pageSize"
+        [skip]="skip" [pageable]="true" [sortable]="true" (pageChange)="pageChange($event)">
         <kendo-grid-column filter="none" title="" width="35">
           <ng-template kendoGridCellTemplate let-dataItem>
-            <input (click)="partSelect(dataItem.partid)" type="checkbox" />
+            <input (click)="partSelect(dataItem.PartID)" type="checkbox" />
           </ng-template>
         </kendo-grid-column>
-        <kendo-grid-column width="150" field="partid" title="Part #" filter="numeric"></kendo-grid-column>
-        <kendo-grid-column width="150" field="brand" title="Brand"></kendo-grid-column>
-        <kendo-grid-column field="description" title="Description"></kendo-grid-column>
-        <kendo-grid-column width="100" field="image" title="Image">
-          <ng-template kendoGridCellTemplate let-dataItem>
-            <img width="25" [src]="dataItem.image" />
-          </ng-template>
-        </kendo-grid-column>
-        <ng-template kendoGridDetailTemplate let-dataItem>
-          <section *ngIf="dataItem.Category">
-            <p>
-              <strong>In Stock:</strong> {{dataItem.UnitsInStock}} units</p>
-            <p>
-              <strong>On Order:</strong> {{dataItem.UnitsOnOrder}} units</p>
-            <p>
-              <strong>Reorder Level:</strong> {{dataItem.ReorderLevel}} units</p>
-            <p>
-              <strong>Category:</strong> {{dataItem.Category?.CategoryName}} - {{dataItem.Category?.Description}}</p>
-          </section>
+        <kendo-grid-column width="150" field="PartID" title="Part #" filter="numeric"></kendo-grid-column>
+        <kendo-grid-column width="150" field="Brand" title="Brand"></kendo-grid-column>
+        <kendo-grid-column field="Description" title="Description"></kendo-grid-column>
+        <ng-template kendoGridDetailTemplate let-dataItem let-rowIndex="rowIndex">
+          <ul *ngFor="let i of moreDetail[rowIndex] | keys; let x = index">
+            <ng-container *ngIf="x > 1">
+              <li><strong>{{ i.key }}</strong> {{ i.value }}</li>
+            </ng-container>
+          </ul>
         </ng-template>
       </kendo-grid>
     </div>
@@ -46,7 +36,7 @@
 </section>
 
 <!-- FILTER -->
-<filter *ngIf="FOpened" (open)="filter($event)"></filter>
+<filter *ngIf="FOpened" (grid)="update($event)" (open)="filter($event)"></filter>
 
 <!-- PARTS -->
-<parts *ngIf="POpened" (open)="parts($event)"></parts>
+<parts *ngIf="POpened" (open)="parts($event)" [part]="part"></parts>

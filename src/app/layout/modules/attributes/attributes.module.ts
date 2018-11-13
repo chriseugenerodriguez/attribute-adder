@@ -15,6 +15,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { UploadModule } from '@progress/kendo-angular-upload';
 import { HttpClientModule } from '@angular/common/http';
+
+// ALERT
 import { AlertModule } from 'ngx-bootstrap/alert';
 
 @NgModule({
@@ -34,7 +36,8 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		UploadModule,
 		HttpClientModule,
 
-		AlertModule
+		// ALERT
+		AlertModule.forRoot()
 	],
 	exports: [
 		AttributesComponent

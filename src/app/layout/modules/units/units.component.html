@@ -29,42 +29,12 @@
           <td>
             <input *ngIf="editStep == i" type="text" class="form-control" formControlName="Value" />
             <span *ngIf="editStep !== i">
-              <a *ngIf="editStep == null" class="cursor" (click)="manageSingleUnit(x)">{{ x.value.Value }}</a>
-              <span *ngIf="editStep !== null">{{ x.value.Value }}</span>
+              {{ x.value.Value }}
             </span>
           </td>
           <td *ngIf="groupDelete || groupEdit">
-            <span *ngIf="groupDelete" class="fa fa-times-circle pull-right cursor" (click)="removeGroupStep(i)"></span>
-            <span *ngIf="groupEdit" (click)="editGroupStep(i)" class="fa fa-pencil cursor"></span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3 class="title" *ngIf="singleView || singleCreate">Selected UOM: {{ selectedUnit }}</h3>
-
-    <!-- VIEW - SINGLE -->
-    <table class="table table-hover sp" [formGroup]="Unit" *ngIf="singleView">
-      <thead>
-        <tr>
-          <td></td>
-          <td>Value</td>
-          <td width="50" *ngIf="singleDelete || singleEdit"></td>
-        </tr>
-      </thead>
-      <tbody formArrayName="items">
-        <tr *ngIf="!Unit.controls['items'].length">
-          <td colspan="2" class="text-center">No Results Found</td>
-        </tr>
-        <tr *ngFor="let x of Unit.controls['items'].controls; let i = index;" [formGroupName]="i">
-          <td width="50">{{ i + 1 }}</td>
-          <td>
-            <input *ngIf="editStep == i" type="text" class="form-control" formControlName="Value" />
-            <span *ngIf="editStep !== i">{{ x.value.Value }}</span>
-          </td>
-          <td *ngIf="singleDelete || singleEdit">
-            <span *ngIf="singleDelete" class="fa fa-times-circle pull-right cursor" (click)="removeSingleStep(i)"></span>
-            <span *ngIf="singleEdit" class="fa fa-pencil cursor" (click)="editSingleStep(i)"></span>
+            <span *ngIf="groupDelete" class="fa fa-times-circle pull-right cursor" (click)="removeGroupStep(x.value, i)"></span>
+            <span *ngIf="groupEdit" (click)="editGroupStep(x.value.Key, i)" class="fa fa-pencil cursor"></span>
           </td>
         </tr>
       </tbody>
@@ -86,35 +56,12 @@
           </td>
       </tbody>
     </table>
-
-    <!-- ADD - Single -->
-    <table class="table table-hover sp" [formGroup]="UnitAdd" *ngIf="singleCreate">
-      <thead>
-        <tr>
-          <td>Value</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <input type="text" class="form-control" formControlName="Value" />
-          </td>
-      </tbody>
-    </table>
   </div>
-
 
   <kendo-dialog-actions *ngIf="groupSelect">
     <button class="k-button" (click)="units('group-edit')">Edit</button>
     <button class="k-button" (click)="units('group-delete')">Delete</button>
     <button class="k-button k-primary" dir="ltr" primary="true" (click)="units('group-create')">Create</button>
-  </kendo-dialog-actions>
-
-  <kendo-dialog-actions *ngIf="singleSelect">
-    <button class="k-button" (click)="units('single-back')">Back</button>
-    <button class="k-button" (click)="units('single-edit')">Edit</button>
-    <button class="k-button" (click)="units('single-delete')">Delete</button>
-    <button *ngIf="Unit.value.length < 1" class="k-button k-primary" dir="ltr" primary="true" (click)="units('single-add')">Add</button>
   </kendo-dialog-actions>
 
   <kendo-dialog-actions *ngIf="groupConfirm">
@@ -123,13 +70,5 @@
       [disabled]="!Units.dirty">Confirm</button>
     <button *ngIf="groupCreate" class="k-button k-primary" dir="ltr" primary="true" (click)="units('group-confirm')"
       [disabled]="!UnitsAdd.valid">Confirm</button>
-  </kendo-dialog-actions>
-
-  <kendo-dialog-actions *ngIf="singleConfirm">
-    <button class="k-button" (click)="units('single-cancel')">Cancel</button>
-    <button *ngIf="singleEditConfirm" class="k-button k-primary" dir="ltr" primary="true" (click)="units('single-confirm')"
-      [disabled]="!Unit.dirty">Confirm</button>
-    <button *ngIf="singleCreate" class="k-button k-primary" dir="ltr" primary="true" (click)="units('single-confirm')"
-      [disabled]="!UnitAdd.valid">Confirm</button>
   </kendo-dialog-actions>
 </kendo-dialog>

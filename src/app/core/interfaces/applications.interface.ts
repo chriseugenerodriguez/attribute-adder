@@ -1,6 +1,6 @@
 export interface IApplications {
-	partid: string,
-	brand: string,
-	description: string,
+	PartID: string,
+	Brand: string,
+	Description: string,
 	image: object,
 };
