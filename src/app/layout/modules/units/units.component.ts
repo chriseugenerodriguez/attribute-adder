@@ -10,17 +10,17 @@ import { AlertComponent } from 'ngx-bootstrap/alert';
 	templateUrl: './units.component.html'
 })
 export class UnitsComponent implements OnInit {
-	// TOGGLE
+
 	@Output() open = new EventEmitter<boolean>(true);
 
 	stepRow: number;
 	inputs = [];
 	inputsAttribute = [];
 
-	// MESSAGE
+
 	message: Array<object> = [];
 
-	// GROUP
+
 	Units: FormGroup;
 	UnitsAdd: FormGroup;
 	stepUnits: any;
@@ -44,7 +44,7 @@ export class UnitsComponent implements OnInit {
 	constructor(private api: API, private fb: FormBuilder) {
 		this.editStep = null;
 
-		// GROUP
+	
 		this.Units = this.fb.group({
 			items: this.fb.array([])
 		});
@@ -68,7 +68,7 @@ export class UnitsComponent implements OnInit {
 			this.reset();
 		}
 
-		// GROUP
+	
 		if (status === 'group-delete') {
 			this.groupDelete = !this.groupDelete;
 			this.groupEdit = false;
@@ -158,7 +158,7 @@ export class UnitsComponent implements OnInit {
 	}
 
 	private resetSearch() {
-		// this.stepUnits.controls = [];
+	
 
 		for (const x of this.inputsAttribute) {
 			this.stepUnits.push(this.createGroupUnit(

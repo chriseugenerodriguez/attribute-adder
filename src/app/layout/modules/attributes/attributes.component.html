@@ -1,8 +1,9 @@
 <!-- MANAGE -->
 <kendo-dialog class="manage" title="Manage Attributes" (close)="manage('close')">
   <ng-container *ngFor="let i of message">
-    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true"> {{ i.value
-      }} </alert>
+    <alert *ngIf="i" [type]="i.type" (onClosed)="close(i)" [dismissOnTimeout]="4000" [dismissible]="true">
+      <div [innerHtml]="i.value"></div>
+    </alert>
   </ng-container>
   <div class="row">
     <div class="list-attributes" *ngIf="groupView">
@@ -150,31 +151,21 @@
               {{ i + 1 }}
             </td>
             <td>
-              {{ x.value.Ext }}
-              <span *ngIf="x.value.Ext === '.pdf'" class="fa fa-file-pdf-o"></span>
-              <span *ngIf="x.value.Ext === '.mp4'" class="fa fa-file-video-o"></span>
-              <span *ngIf="x.value.Ext === '.mp3'" class="fa fa-file-audio-o"></span>
-              <span *ngIf="x.value.Ext === '.docx'" class="fa fa-file-word-o"></span>
-              <span *ngIf="x.value.Ext === '.ppt'" class="fa fa-file-powerpoint-o"></span>
-              <span *ngIf="x.value.Ext === '.xlsx'" class="fa fa-file-excel-o"></span>
-              <span *ngIf="x.value.Ext === '.txt'" class="fa fa-file-text-o"></span>
-              <span *ngIf="x.value.Ext === '.svg'" class="fa fa-file-code-o"></span>
-              <span *ngIf="x.value.Ext === '.png' || x.value.Ext === '.gif' || x.value.Ext === '.jpg'" class="fa fa-file-image-o"></span>
+              <span *ngIf="x.value.Extension === '.pdf'" class="fa fa-file-pdf-o"></span>
+              <span *ngIf="x.value.Extension === '.mp4'" class="fa fa-file-video-o"></span>
+              <span *ngIf="x.value.Extension === '.mp3'" class="fa fa-file-audio-o"></span>
+              <span *ngIf="x.value.Extension === '.docx'" class="fa fa-file-word-o"></span>
+              <span *ngIf="x.value.Extension === '.ppt' || x.value.Extension === '.pptx'" class="fa fa-file-powerpoint-o"></span>
+              <span *ngIf="x.value.Extension === '.xlsx' || x.value.Extension === '.csv'" class="fa fa-file-excel-o"></span>
+              <span *ngIf="x.value.Extension === '.zip'" class="fa fa-file-archive-o"></span>
+              <span *ngIf="x.value.Extension === '.txt'" class="fa fa-file-text-o"></span>
+              <span *ngIf="x.value.Extension === '.svg' || x.value.Extension === '.json'" class="fa fa-file-code-o"></span>
+              <span *ngIf="x.value.Extension === '.png' || x.value.Extension === '.gif' || x.value.Extension === '.jpg' || x.value.Extension === '.jpeg'"
+                class="fa fa-file-image-o"></span>
             </td>
             <td>
-              <a *ngIf="editStep !== i" href="{{ x.value.Source }}" target="_blank">{{ x.value.FileValue }}</a>
-              <kendo-upload *ngIf="editStep == i" [multiple]="false" [autoUpload]="false" [removeUrl]="uploadRemoveCSV"
-                (success)="uploadSuccess($event)" (upload)="uploadEvent($event)" [withCredentials]="false"
-                formControlName="uploadFile">
-                <ng-template kendoUploadFileTemplate let-files let-state="state">
-                  <div *ngIf="format(state) == false" class="upload">
-                    Wrong file type, please try again.
-                  </div>
-                  <div *ngIf="format(state)" class="upload">
-                    {{files[0].name}}
-                  </div>
-                </ng-template>
-              </kendo-upload>
+              <a *ngIf="editStep !== i" [href]="x.value.Source" target="_blank">{{ x.value.FileValue }}</a>
+              <input *ngIf="editStep == i" type="file" (change)="formData($event.target.files[0])" />
             </td>
             <td *ngIf="singleDelete || singleEdit">
               <span *ngIf="singleDelete" class="fa fa-times-circle pull-right cursor" (click)="removeUploadFile(x.value.AttributeValueID, i)"></span>
@@ -188,7 +179,7 @@
     <!-- ADD - SINGLE -->
     <table class="table table-hover sp" [formGroup]="Add" *ngIf="singleAdd">
       <!-- Number -->
-      <ng-container *ngIf="singleSelectedValue['TypeKey'] != 'File'">
+      <ng-container *ngIf="singleSelectedValue['TypeKey'] == 'Numeric'">
         <thead>
           <tr>
             <td width="200">Number</td>
@@ -208,7 +199,7 @@
       </ng-container>
 
       <!-- String -->
-      <ng-container *ngIf="attributeString">
+      <ng-container *ngIf="singleSelectedValue['TypeKey'] == 'String'">
         <thead>
           <tr>
             <td>Name</td>
@@ -229,26 +220,16 @@
 
       <!--File Upload-->
       <ng-container *ngIf="singleSelectedValue['TypeKey'] == 'File'">
-        <thead>
-          <tr>
-            <td>Upload File</td>
-          </tr>
-        </thead>
         <tbody>
           <tr>
             <td>
-              <kendo-upload [multiple]="false" [removeUrl]="uploadRemoveCSV" (success)="uploadSuccess($event)"
-                (upload)="uploadEvent($event)" [withCredentials]="false" formControlName="File">
-                <ng-template kendoUploadFileTemplate let-files let-state="state">
-                  <div *ngIf="format(state) == false" class="upload">
-                    Wrong file type, please try again.
-                  </div>
-                  <div *ngIf="format(state)" class="upload">
-                    <a (click)="download(files[0])">{{files[0].name}} </a>
-                    <i (click)="removeUploadFile(file, files[0].uid)" class="fa fa-times-circle-o"></i>
-                  </div>
-                </ng-template>
-              </kendo-upload>
+              <div class="box">
+                <div class="box__input">
+                  <i class="fa fa-upload box__icon"></i>
+                  <input class="box__file" type="file" name="files" id="file" formControlName="File" (change)="formData($event.target.files[0])" />
+                  <label for="file">Choose a file to upload.</label>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -303,8 +284,10 @@
 
   <kendo-dialog-actions id="attribute-single-confirm" *ngIf="singleSelect">
     <button class="k-button" (click)="manage('single-cancel')">Cancel</button>
-    <button *ngIf="singleEditConfirm" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
+    <button *ngIf="singleEditConfirm && singleSelectedValue['TypeKey'] != 'File'" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
       [disabled]="!Attribute.dirty">Confirm</button>
+      <button *ngIf="singleEditConfirm && singleSelectedValue['TypeKey'] == 'File'" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
+      [disabled]="!files">Confirm</button>
     <button *ngIf="singleAdd" class="k-button k-primary" dir="ltr" primary="true" (click)="manage('single-confirm')"
       [disabled]="!Add.valid">Confirm</button>
   </kendo-dialog-actions>

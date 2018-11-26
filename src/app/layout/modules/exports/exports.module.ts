@@ -29,7 +29,7 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		ReactiveFormsModule,
 		RouterModule,
 
-		// ALERT
+	
 		AlertModule.forRoot()
 	],
 	exports: [

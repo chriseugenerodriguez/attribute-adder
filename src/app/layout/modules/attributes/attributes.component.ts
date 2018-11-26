@@ -1,26 +1,25 @@
 import { Component, OnInit, Output, EventEmitter, ElementRef } from '@angular/core';
 import { API } from '../../../core';
-import { filter } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
-
-import { FileRestrictions, SuccessEvent, UploadEvent, FileInfo, FileState } from '@progress/kendo-angular-upload';
 
 import { FormArray, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { AlertComponent } from 'ngx-bootstrap/alert';
+
+// RESPONSE
+import { Http } from '@angular/http';
 
 @Component({
 	selector: 'attributes',
 	templateUrl: './attributes.component.html'
 })
 export class AttributesComponent implements OnInit {
-	// TOGGLE
+
 	@Output() open = new EventEmitter<boolean>(true);
 
-	// MESSAGE
+
 	message: Array<object> = [];
 
-	// MANAGE
+
 	inputs = [];
 	inputsAttributes = [];
 	items: any[] = [];
@@ -28,10 +27,10 @@ export class AttributesComponent implements OnInit {
 	type: Array<{ key: number, value: string }>;
 	unit: Array<{ key: number, value: string }>;
 
-	// FILTER
+
 	listUnits: string;
 
-	// SINGLE
+
 	Attribute: FormGroup;
 	Add: FormGroup;
 	stepAttribute: any;
@@ -48,7 +47,7 @@ export class AttributesComponent implements OnInit {
 	singleEditConfirm: boolean;
 	editStep: any;
 
-	// GROUP
+
 	Attributes: FormGroup;
 	Create: FormGroup;
 	stepAttributes: any;
@@ -68,15 +67,12 @@ export class AttributesComponent implements OnInit {
 	groupEditConfirm: boolean;
 	groupEditStep: number;
 
-	// File UPLOAD
-	uploadFiles: Array<FileInfo> = [];
-	uploadUrl: string = this.api.apibase;
-	uploadRemoveUrl: string = '';
+	// FILE
+	files: any;
 
-	constructor(private api: API, private fb: FormBuilder) {
+	constructor(private api: API, private fb: FormBuilder, private http: Http) {
 		this.editStep = null;
 
-		// FORM GROUPS
 		this.Create = this.fb.group({
 			Name: [null, Validators.required],
 			Multiselect: [false],
@@ -84,15 +80,12 @@ export class AttributesComponent implements OnInit {
 			UOMKey: [null]
 		});
 
-		// ADD CHILD
 		this.Add = this.fb.group({});
 
-		// FORM GROUPS - ARRAY
 		this.Attributes = this.fb.group({
 			items: this.fb.array([])
 		});
 
-		// FORM GROUPS - ARRAY (STRING)
 		this.Attribute = this.fb.group({
 			items: this.fb.array([])
 		});
@@ -137,23 +130,23 @@ export class AttributesComponent implements OnInit {
 	}
 
 	reset() {
-		// MANAGE
+		const group = 'group';
+		const single = 'single';
+
 		this.groupAttribute = true;
 		this.groupView = true;
-		this.groupDelete = false;
-		this.groupEdit = false;
-		this.groupSelect = false;
-		this.groupCreate = false;
 
 		this.editStep = null;
 
-		// SINGLE
-		this.singleAttribute = false;
-		this.singleView = false;
-		this.singleSelect = false;
-		this.singleDelete = false;
-		this.singleEdit = false;
-		this.singleAdd = false;
+		const a = ['Delete', 'Edit', 'Select', 'Create'];
+		for (let i = 0; i < a.length; i++) {
+			this[group + a[i]] = false;
+		}
+
+		const b = ['Attribute', 'View', 'Select', 'Delete', 'Edit', 'Add'];
+		for (let i = 0; i < b.length; i++) {
+			this[single + b[i]] = false;
+		}
 
 		this.stepAttributes.controls.splice(0);
 
@@ -182,7 +175,7 @@ export class AttributesComponent implements OnInit {
 		});
 	}
 
-	// Manage different view
+
 	manage(status) {
 		this.confirm = false;
 
@@ -195,7 +188,6 @@ export class AttributesComponent implements OnInit {
 			this.stepAttribute = [];
 		}
 
-		// SINGLE
 		if (status === 'single-add') {
 			this.singleSelect = true;
 			this.singleEdit = false;
@@ -237,24 +229,46 @@ export class AttributesComponent implements OnInit {
 					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueFile';
 				}
 
-				delete a.AttributeValueID;
-				delete a.AttributeID;
+				if (this.singleSelectedValue['TypeKey'] !== 'File') {
+					delete a.AttributeValueID;
+					delete a.AttributeID;
 
-				this.api.patch('attributevalues(' + b + ')', a).subscribe(
-					(r) => {
-						this.alert('success', '"' + a.Name + '"' + ' has been successfully updated');
-						this.reset();
-					},
-					(err) => {
-						this.reset();
+					this.api.patch('attributevalues(' + b + ')', a).subscribe(
+						(r) => {
+							this.alert('success', '"' + a.Name + '"' + ' has been successfully updated');
+							this.reset();
+						},
+						(err) => {
+							this.reset();
 
-						if (err.status === 409) {
-							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
-						} else {
-							this.alert('error', err['status'] + ' - ' + err['statusText'])
+							if (err.status === 409) {
+								this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+							} else {
+								this.alert('error', err['status'] + ' - ' + err['statusText'])
+							}
 						}
-					}
-				)
+					)
+				} else {
+					const c = this.files;
+					c.append('attributeValueId', a.AttributeID);
+
+					this.http.post(this.api.apibase + 'attributevalues(' + a.AttributeValueID + ')/uploadfile', c).subscribe(
+						(r) => {
+							if (r) {
+								this.alert('success', 'This has been successfully uploaded');
+								this.reset();
+							}
+						},
+						(err) => {
+							if (err.status === 409) {
+
+								this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+							} else {
+								this.alert('error', err['status'] + ' - ' + err['statusText'])
+							}
+						}
+					)
+				}
 			}
 
 			if (this.singleAdd) {
@@ -271,26 +285,47 @@ export class AttributesComponent implements OnInit {
 					a['@odata.type'] = '#Phx.ProductManager.Data.Entities.AttributeValueFile';
 				}
 
-				this.api.post('attributevalues', a).subscribe(
-					(r) => {
-						if (r) {
-							this.alert('success', '"' + this.singleSelectedValue['Name'] + '"' + ' has been successfully created');
-							this.reset();
-						}
-					},
-					(err) => {
-						if (err.status === 409) {
+				if (this.singleSelectedValue['TypeKey'] !== 'File') {
+					this.api.post('attributevalues', a).subscribe(
+						(r) => {
+							if (r) {
+								this.alert('success', '"' + this.singleSelectedValue['Name'] + '"' + ' has been successfully created');
+								this.reset();
+							}
+						},
+						(err) => {
+							if (err.status === 409) {
 
-							this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
-						} else {
-							this.alert('error', err['status'] + ' - ' + err['statusText'])
+								this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+							} else {
+								this.alert('error', err['status'] + ' - ' + err['statusText'])
+							}
 						}
-					}
-				)
+					)
+				} else {
+					const b = a.AttributeID;
+					const c = this.files;
+
+					this.http.post(this.api.apibase + 'attributevalues(' + b + ')/uploadfile', c).subscribe(
+						(r) => {
+							if (r) {
+								this.alert('success', 'This has been successfully uploaded');
+								this.reset();
+							}
+						},
+						(err) => {
+							if (err.status === 409) {
+
+								this.alert('error', err['status'] + ' - ' + 'This is not a unique value.');
+							} else {
+								this.alert('error', err['status'] + ' - ' + err['statusText'])
+							}
+						}
+					)
+				}
 			}
 		}
 
-		// GROUP
 		if (status === 'group-delete') {
 			this.groupDelete = !this.groupDelete;
 			this.groupEdit = false;
@@ -345,7 +380,7 @@ export class AttributesComponent implements OnInit {
 				)
 			}
 			if (this.groupCreate) {
-				let a = this.Create.value;
+				const a = this.Create.value;
 
 				a['@odata.type'] = '#Phx.ProductManager.Data.Entities.Attribute';
 
@@ -388,13 +423,16 @@ export class AttributesComponent implements OnInit {
 
 	filterAttribute(obj) {
 		const a = obj.target.value;
-
 		this.inputsAttributes = this.inputs.filter((s) => s.value.toLowerCase().indexOf(a.toLowerCase()) !== -1);
-
 		this.resetSearch();
 	}
 
-	// MANAGE
+	formData(file) {
+		this.files = new FormData();
+		this.files.append(file.name, file);
+	}
+
+
 	createSingleStringAttribute(AttributeValueID?: number, AttributeID?: number, StringValue?: string, StringDetail?: string) {
 		return this.fb.group({
 			AttributeValueID: [AttributeValueID],
@@ -419,12 +457,11 @@ export class AttributesComponent implements OnInit {
 			AttributeID: [AttributeID],
 			FileValue: [FileValue],
 			Source: [Source],
-			Ext: [Extension],
+			Extension: [Extension],
 		})
 	}
 
 	createGroupAttribute(id?: number, name?: string, multiselect?: boolean, type?: string, unit?: string) {
-
 		return this.fb.group({
 			AttributeID: [id],
 			Name: [name],
@@ -447,10 +484,31 @@ export class AttributesComponent implements OnInit {
 					this.alert('success', '"' + idx.Name + '" has been successfully deleted');
 				},
 				(err) => {
-					this.alert('error', err['status'] + ' - ' + err['statusText']);
+					const b = {idx, i};
+
+					if (err.status === 406) {
+						// tslint:disable-next-line:max-line-length
+						this.alert('error', err['status'] + ' - ' + 'This has associations to part. Confirm by clicking <a (click)="confirmGroupDelete(' + b + ')">here</a>');
+					} else {
+						this.alert('error', err['status'] + ' - ' + err['statusText'])
+					}
 				}
 			)
 		}
+	}
+
+	confirmGroupDelete(val) {
+		const a = val.idx.AttributeID;
+
+		this.api.delete('attributes(' + a + ')&force=true').subscribe(
+			(r) => {
+				this.stepAttributes.removeAt(val.i);
+				this.groupDelete = false;
+				this.groupEdit = false;
+
+				this.alert('success', '"' + val.idx.Name + '" has been successfully deleted');
+			}
+		);
 	}
 
 	removeSingleStep(idx, i) {
@@ -503,7 +561,6 @@ export class AttributesComponent implements OnInit {
 
 		this.stepAttribute.controls.splice(0);
 
-		// TYPES
 		if (this.singleSelectedValue['TypeKey'] === 'String') {
 			this.attributeString = true;
 		}
@@ -511,7 +568,7 @@ export class AttributesComponent implements OnInit {
 			this.attributeString = false;
 		}
 
-		if (!this.attributeString) {
+		if (this.singleSelectedValue['TypeKey'] === 'Numeric') {
 			if (!this.Add.value['NumericValue']) {
 				this.Add.addControl('NumericValue', new FormControl('', Validators.required));
 			}
@@ -519,16 +576,15 @@ export class AttributesComponent implements OnInit {
 			this.Add.removeControl('StringValue');
 			this.Add.removeControl('StringDetail');
 		}
-		if (this.singleSelectedValue['TypeKey'] !== 'File') {
+		if (this.singleSelectedValue['TypeKey'] === 'String') {
 			if (!this.Add.value['StringValue'] && !this.Add.value['StringDetail']) {
 				this.Add.addControl('StringValue', new FormControl('', Validators.required));
 				this.Add.addControl('StringDetail', new FormControl('', Validators.required));
 			}
 			this.Add.removeControl('File');
 			this.Add.removeControl('NumericValue');
-		} else {
-			console.log(this.singleSelectedValue);
-			this.uploadUrl = this.uploadUrl + 'attributevalues(' + this.singleSelectedValue['AttributeID'] + ')/uploadfile';
+		}
+		if (this.singleSelectedValue['TypeKey'] === 'File') {
 			if (!this.Add.value['File']) {
 				this.Add.addControl('File', new FormControl('', Validators.required));
 			}
@@ -536,7 +592,7 @@ export class AttributesComponent implements OnInit {
 			this.Add.removeControl('NumericValue');
 			this.Add.removeControl('StringDetail');
 		}
-		// tslint:disable-next-line:max-line-length
+
 		this.api.get('./attributes/data-file.json', 'Attributes(' + this.singleSelectedValue['AttributeID'] + ')/getAttributeValues').subscribe(r => {
 			if (this.singleSelectedValue['TypeKey'] === 'String') {
 				for (const x of r['value']) {
@@ -563,52 +619,13 @@ export class AttributesComponent implements OnInit {
 					this.stepAttribute.push(this.createSingleFileAttribute(
 						x.AttributeID,
 						x.AttributeValueID,
-						x.ImageValue,
+						x.FileValue,
 						x.Source,
-						x.extension
+						x.Extension
 					));
 				}
 			}
 		});
-	}
-
-
-	public uploadEvent(e: UploadEvent) {
-		const l = e.files[0];
-		e.headers = e.headers.append('x-fileid', l['uid']);
-		e.headers = e.headers.append('x-fileid-size', JSON.stringify(l['size']));
-		// e.headers = e.headers.append('Authorization', 'Bearer ' + this.AS.getToken());
-
-		const up = {
-			extension: l['extension'],
-			name: l['rawFile'].name,
-			size: l['size'],
-			uid: l['uid'],
-			url: 'https://phenomenexdev.blob.core.windows.net/attributevaluefiles/' + l['uid'] + l['extension']
-		};
-		this.uploadFiles.push(up);
-
-		this.Add.setValue(this.uploadFiles);
-	}
-
-	public removeUploadFile(upload, uid: string) {
-		for (const x of this.uploadFiles) {
-			if (x.uid === uid) {
-				this.uploadFiles.splice(this.uploadFiles.indexOf(x), 1);
-				break;
-			}
-		}
-
-		this.Add.setValue(this.uploadFiles);
-		this.Add.markAsDirty();
-	}
-
-	public format(state: FileState): boolean {
-		return (state === FileState.Uploaded || state === 1) ? true : false;
-	}
-
-	public download(b) {
-		window.open('https://phenomenexdev.blob.core.windows.net/attributevaluefiles/' + b['uid'] + b['extension'], '_blank');
 	}
 
 	editGroupStep(v, i) {

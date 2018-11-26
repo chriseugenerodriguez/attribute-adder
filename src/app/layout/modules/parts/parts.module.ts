@@ -12,9 +12,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InputsModule } from '@progress/kendo-angular-inputs';
 import { RouterModule } from '@angular/router';
 
-// KEYS
-import { KeysPipeModule } from 'app/core';
-
 // ALERT
 import { AlertModule } from 'ngx-bootstrap/alert';
 
@@ -31,11 +28,7 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		RouterModule,
 		FormsModule,
 
-		// ALERT
 		AlertModule.forRoot(),
-
-		// PIPE
-		KeysPipeModule
 	],
 	exports: [
 		PartsComponent

@@ -78,8 +78,9 @@
             }
 
             span {
-              
-              kendo-dropdownlist, input {
+
+              kendo-dropdownlist,
+              input {
                 display: inline-block;
                 width: 81%;
               }
@@ -121,6 +122,7 @@
     }
   }
 }
+
 
 .units {
   .k-dialog {
@@ -237,7 +239,7 @@
             @include font-size(9px);
             @include border-radius(4px);
             background: #555;
-            color:#fff;
+            color: #fff;
             padding: 2px 5px;
             margin-right: 3px;
             top: -1px;
@@ -329,6 +331,43 @@
           span.cursor {
             cursor: pointer;
           }
+        }
+      }
+
+      .box {
+        font-size: 1.25rem;
+        /* 20 */
+        background-color: #fafafa;
+        position: relative;
+        padding: 100px 20px;
+        outline: 2px dashed #888;
+        outline-offset: -20px;
+        margin: -8px -20px -44px;
+        text-align: center;
+
+        &__file {
+          width: 0.1px;
+          height: 0.1px;
+          opacity: 0;
+          overflow: hidden;
+          position: absolute;
+          z-index: -1;
+
+          + label {
+            max-width: 80%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            display: inline-block;
+            overflow: hidden;
+          }
+        }
+
+        &__icon {
+          @include font-size(60px);
+          color: #777;
+          display: block;
+          margin-bottom: 40px;
         }
       }
     }

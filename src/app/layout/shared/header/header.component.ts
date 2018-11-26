@@ -6,14 +6,14 @@ import { Component, OnInit, ViewChild, Output } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
 
-	// TOGGLE
+
 	AOpened: boolean;
 	EOpened: boolean;
 	UOpened: boolean;
 
 	constructor() {
 
-		// TOGGLE
+	
 		this.AOpened = false;
 		this.EOpened = false;
 		this.UOpened = false;

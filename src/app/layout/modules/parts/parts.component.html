@@ -14,18 +14,19 @@
           <td *ngIf="part.length === 1" width="50"></td>
           <td>Name</td>
           <td>Type</td>
+          <td>Multiple</td>
           <td>UOM</td>
         </tr>
       </thead>
       <tbody *ngIf="attributeFeatures">
         <tr *ngIf="!dataAttribute.length">
-          <td colspan="3" class="text-center">No Results Found</td>
+          <td colspan="5" class="text-center">No Results Found</td>
         </tr>
 
         <tr *ngFor="let x of dataAttribute; let i = index;">
           <td *ngIf="part.length === 1">
-            <ng-container *ngFor="let key of count | keys">
-              <span class="parts-tooltip" *ngIf="x.AttributeID == key.key"> {{ key.value }}</span>
+            <ng-container *ngFor="let i of count">
+              <span class="parts-tooltip" *ngIf="x.AttributeID == i.AttributeId"> {{ i.SelectedCount }}</span>
             </ng-container>
           </td>
           <td>
@@ -33,6 +34,10 @@
           </td>
           <td>
             <span>{{ x.AttributeType.Value }}</span>
+          </td>
+          <td>
+            <span *ngIf="x.Multiselect === true">Yes</span>
+            <span *ngIf="x.Multiselect === false">No</span>
           </td>
           <td>
             <span *ngIf="x.UOMKey">{{ x.UnitOfMeasure.Value }}</span>
@@ -59,10 +64,8 @@
           </tr>
           <tr *ngFor="let x of attributeFeatures; let i = index;">
             <td>
-              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="checkbox" (click)="_selectedFeature(x)" /></span>
-              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x, 'radio')" /></span>
             </td>
             <td>{{ x.StringValue }}</td>
             <td>{{ x.StringDetail }}</td>
@@ -76,7 +79,7 @@
           <tr>
             <td></td>
             <td>Value</td>
-            <td>Details</td>
+            <td>UOM</td>
           </tr>
         </thead>
         <tbody *ngIf="attributeFeatures">
@@ -85,13 +88,11 @@
           </tr>
           <tr *ngFor="let x of attributeFeatures; let i = index;">
             <td>
-              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="checkbox" (click)="_selectedFeature(x)" /></span>
-              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x, 'radio')" /></span>
             </td>
             <td>{{ x.NumericValue }}</td>
-            <td>{{ x.Detail }}</td>
+            <td>{{ selectedAttribute.UnitOfMeasure.Value }}</td>
           </tr>
         </tbody>
       </ng-container>
@@ -102,22 +103,18 @@
           <tr>
             <td></td>
             <td>Name</td>
-            <td>Source</td>
           </tr>
         </thead>
-        <tbody>
+        <tbody *ngIf="selectedAttribute">
           <tr *ngIf="!attributeFeatures.length">
             <td colspan="3" class="text-center">No attributes were added to this attribute</td>
           </tr>
           <tr *ngFor="let x of attributeFeatures; let i = index;">
             <td>
-              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="checkbox" (click)="_selectedFeature(x)" /></span>
-              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)"
-                  type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x.AttributeValueID, 'radio')" /></span>
+              <span *ngIf="selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="checkbox" (click)="_selectedFeature(x)" /></span>
+              <span *ngIf="!selectedAttribute.Multiselect"><input [checked]="selected(x.AttributeValueID)" type="radio" name="feature" [value]="x.AttributeValueID" (click)="_selectedFeature(x, 'radio')" /></span>
             </td>
-            <td>{{ x.FileValue }}</td>
-            <td>{{ x.Source }}</td>
+            <td><a [href]="x.Source" target="_blank">{{ x.FileValue }}</a></td>
           </tr>
         </tbody>
       </ng-container>

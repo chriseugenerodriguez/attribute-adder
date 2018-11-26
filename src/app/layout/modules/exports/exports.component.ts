@@ -12,23 +12,19 @@ import { AlertComponent } from 'ngx-bootstrap/alert';
 	templateUrl: './exports.component.html'
 })
 export class ExportsComponent implements OnInit {
-	// TOGGLE
+
 	@Output() open = new EventEmitter<boolean>(true);
 
-	// FORMGROUP
 	Export: FormGroup;
 	Save: FormGroup;
 
-	// NEW
 	new: boolean;
 	default: boolean;
 
-	// MESSAGE
 	message: Array<object> = [];
 
 	listAttrTypes: Array<string> = ['string', 'number', 'image'];
 
-	// EXPORT
 	removeItemsActive: boolean;
 	addItemsActive: boolean;
 	addI: Array<object> = [];
@@ -40,14 +36,13 @@ export class ExportsComponent implements OnInit {
 	inputs: Array<object> = [];
 	outputs: Array<object> = [];
 
-	// EXPORT Data
 	priceType: Array<ILookup>;
-	imageType: Array<ILookup>;
+	fileType: Array<ILookup>;
 	exportType: Array<ILookup>;
 	accountType: Array<ILookup>;
 
 	priceTypeData: Array<ILookup>;
-	imageTypeData: Array<ILookup>;
+	fileTypeData: Array<ILookup>;
 	exportTypeData: Array<ILookup>;
 	accountTypeData: Array<ILookup>;
 
@@ -55,14 +50,11 @@ export class ExportsComponent implements OnInit {
 	images: Array<object> = [];
 	exports: Array<object> = [];
 
-	// FORM ARRAY
 	ProfileAttributes: any;
 	ProfilePartFields: any;
 
-	// TYPE
 	type: string;
 	update: boolean;
-
 
 	public defaultAttributes: { text: string, value: number } = { text: 'Attributes', value: 1 };
 	public selectedAttributes: { text: string, value: number } = { text: 'Attributes', value: 1 };
@@ -82,21 +74,18 @@ export class ExportsComponent implements OnInit {
 			ProfileName: [null, Validators.required]
 		});
 
-		// FORM GROUPS
 		this.Export = this.fb.group({
 			ProfileId: [''],
 			PriceListKey: ['', Validators.required],
-			ImageTypeKey: ['', Validators.required],
+			FileTypeKey: ['', Validators.required],
 			ExportFormatKey: ['', Validators.required],
 			ProfileAttributes: this.fb.array([], Validators.required),
 			ProfilePartFields: this.fb.array([], Validators.required),
 		});
 
-		// FORM ARRAY
 		this.ProfileAttributes = <FormArray>this.Export.controls['ProfileAttributes'];
 		this.ProfilePartFields = <FormArray>this.Export.controls['ProfilePartFields'];
 
-		// DROPDOWN INITIAL
 		this.api.get('./export/attributes.json', 'Attributes').subscribe(r => {
 			this.type = 'Attributes';
 			this.inputs = r['value'];
@@ -105,19 +94,14 @@ export class ExportsComponent implements OnInit {
 
 	ngOnInit(): void {
 
-		this.Export.statusChanges.subscribe((r) => {
-			console.log(this.Export.value);
-		})
-
-		// EXPORT
 		this.api.get('./export/account.json', 'profiles').subscribe(r => {
 			this.accountType = r['value'];
 			this.accountTypeData = r['value'];
 		});
 
-		this.api.get('./export/image.json', 'profiles/GetImageTypes').subscribe(r => {
-			this.imageType = r['value'];
-			this.imageTypeData = r['value'];
+		this.api.get('./export/image.json', 'profiles/GetFileTypes').subscribe(r => {
+			this.fileType = r['value'];
+			this.fileTypeData = r['value'];
 		});
 
 		this.api.get('./export/export.json', 'profiles/GetExportFormats').subscribe(r => {
@@ -195,7 +179,6 @@ export class ExportsComponent implements OnInit {
 				}
 			}
 
-			// META
 			this.Export.value['ProfileAttributes'] = attr;
 			this.Export.value['ProfilePartFields'] = ax;
 
@@ -205,12 +188,23 @@ export class ExportsComponent implements OnInit {
 
 			const a = { 'profile': this.Export.value };
 
-
-			this.api.post('profiles/Default.exportparts', a).subscribe(
+			this.api.download('profiles/exportparts', a).subscribe(
 				(r) => {
-					const blob = new Blob([r], { type: 'text/csv' });
-					const url = window.URL.createObjectURL(blob);
-					window.open(url);
+					this.alert('success', ' Success - File is downloading now.');
+					console.log(r);
+					if (r.type === 'text/csv') {
+						const blob: Blob = new Blob([r.file], { type: 'text/csv' });
+						const fileName: string = 'export.csv';
+						const objectUrl: string = URL.createObjectURL(blob);
+						const a: HTMLAnchorElement = document.createElement('a') as HTMLAnchorElement;
+						a.href = objectUrl;
+						a.download = fileName;
+						document.body.appendChild(a);
+						a.click();
+						document.body.removeChild(a);
+					} else {
+						window.open(window.URL.createObjectURL(r.file));
+					}
 				},
 				(err) => {
 					this.alert('error', err['status'] + ' - ' + err['statusText'])
@@ -241,7 +235,7 @@ export class ExportsComponent implements OnInit {
 				}
 			}
 
-			// META
+
 			this.Export.value['@odata.context'] = 'http://www.phenomenex.com/$metadata#Profiles/$entity';
 
 			this.Export.value['ProfileNameValue'] = this.Save.value.ProfileName;
@@ -481,7 +475,7 @@ export class ExportsComponent implements OnInit {
 		this.api.get('./export/attributes.json', 'profiles(' + a + ')').subscribe(r => {
 			this.Export.controls['PriceListKey'].setValue(r['PriceListKey']);
 			this.Export.controls['ExportFormatKey'].setValue(r['ExportformatKey']);
-			this.Export.controls['ImageTypeKey'].setValue(r['ImageTypeKey']);
+			this.Export.controls['FileTypeKey'].setValue(r['FileTypeKey']);
 			this.Save.controls['ProfileName'].setValue(r['ProfileNameValue']);
 
 			this.update = true;

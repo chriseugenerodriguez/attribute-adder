@@ -36,11 +36,11 @@ import { KeysPipeModule } from 'app/core';
 		DropDownsModule,
 		LayoutModule,
 
-		// MODULES
+	
 		PartsModule,
 		FilterModule,
 
-		// PIPE
+	
 		KeysPipeModule
 	],
 	exports: [

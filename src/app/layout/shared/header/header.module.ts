@@ -33,7 +33,7 @@ import { AttributesModule } from '../../modules/attributes/attributes.module';
 		DropDownsModule,
 		InputsModule,
 
-		// MODULES
+	
 		UnitsModule,
 		ExportsModule,
 		AttributesModule

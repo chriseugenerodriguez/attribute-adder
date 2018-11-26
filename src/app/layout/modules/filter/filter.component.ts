@@ -10,41 +10,41 @@ import { AlertComponent } from 'ngx-bootstrap/alert';
 })
 export class FilterComponent implements OnInit {
 
-	// INPUT
+
 	@ViewChild('type') input: ElementRef;
 
-	// TOGGLE
+
 	@Output() open = new EventEmitter<boolean>(true);
 
-	// MESSAGE
+
 	message: Array<object> = [];
 
-	// SINGLE
+
 	oData: FormGroup;
 	selectedAttribute: string;
 	selectedValue: string;
 	selectedOperator: string;
 	items: any[] = [];
 
-	// GROUP
+
 	oDatas: FormGroup;
 	stepDatas: any;
 
-	// FILTERS
+
 	attributes: Array<string> = [];
 	operator: Array<string> = [];
 	groupData: Array<string> = ['And', 'Or'];
 
 	@Output() grid = new EventEmitter<any>(true);
 
-	// EDIT
+
 	eEdit: any;
 	eNew: any;
 	eConfirm: true;
 
 
 	constructor(private api: API, private fb: FormBuilder, private renderer: Renderer2) {
-		// SINGLE
+	
 		this.oData = this.fb.group({
 			attribute: ['', Validators.required],
 			operator: ['', Validators.required],
@@ -60,7 +60,7 @@ export class FilterComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		// FILTERS
+	
 		this.api.get('./filter/attributes.json', '/parts/getfields').subscribe(r => {
 			this.attributes = r['value'];
 		});
@@ -104,7 +104,7 @@ export class FilterComponent implements OnInit {
 							c[i] = `${a[i].Attribute}` + ' ' + `${a[i].Operator}` + ' ' + `${a[i].Value}`;
 						}
 						if (v['Type'] === 'String') {
-							// tslint:disable-next-line:quotemark
+						
 							c[i] = `${a[i].Attribute}` + " " + `${a[i].Operator}` + " " + "'" + `${a[i].Value}` + "'";
 						}
 					}
@@ -158,7 +158,7 @@ export class FilterComponent implements OnInit {
 		}
 		this.stepDatas.push(this.createSingleAttribute(v.attribute, v.operator, v.value, v.group));
 
-		// RESET
+	
 		this.renderer.setAttribute(this.input.nativeElement, 'type', 'text');
 
 	}

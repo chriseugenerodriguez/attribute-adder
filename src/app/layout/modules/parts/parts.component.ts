@@ -11,16 +11,11 @@ import { AlertComponent } from 'ngx-bootstrap/alert';
 })
 export class PartsComponent implements OnInit {
 
-	// MESSAGE
 	message: Array<object> = [];
 
-	// DATA
 	@Input() part;
-
-	// TOGGLE
 	@Output() open = new EventEmitter<boolean>(true);
 
-	// PARTS
 	private attributes: Array<IAttribute> = [];
 	private dataAttribute: Array<IAttribute> = [];
 	private attributeFeatures: Array<object> = [];
@@ -29,10 +24,9 @@ export class PartsComponent implements OnInit {
 
 	private view: boolean;
 	private showFeatures: boolean = false;
-	private featureList: any;
+	private featureList = new Array();
 	private feature: string = '';
 
-	// ASSOCIATIONS
 	count: any;
 	selectedAttributes: any;
 
@@ -41,7 +35,6 @@ export class PartsComponent implements OnInit {
 
 	ngOnInit() {
 
-		// PARTS
 		this.api.get('./export/attributes.json', 'Attributes?$expand=AttributeType,UnitOfMeasure').subscribe(r => {
 			this.attributes = r['value'];
 
@@ -54,10 +47,9 @@ export class PartsComponent implements OnInit {
 			}
 		});
 
-		// COUNT
 		if (this.part.length === 1) {
-			this.api.get('./export/attributes.json', 'parts(' + this.part[0].Id + ')/getselectedattributescount').subscribe((r) => {
-				this.count = r;
+			this.api.get('./export/attributes.json', 'parts/GetSelectedAttributesCount(key=' + this.part[0].Id + ')').subscribe((r) => {
+				this.count = r['value'];
 			})
 		}
 	}
@@ -92,7 +84,7 @@ export class PartsComponent implements OnInit {
 
 			const a = { attributeId: this.selectedAttribute['AttributeID'], attributeValueIds: fl, partIds: pi }
 
-			this.api.post('parts/Default.AssociateParts', a).subscribe(
+			this.api.post('parts/AssociateParts', a).subscribe(
 				(r) => {
 					this.alert('success', 'This has been successfully associated');
 
@@ -107,18 +99,15 @@ export class PartsComponent implements OnInit {
 	}
 
 	private _selectedFeature(v, t) {
-		const a = this.featureList.find(e => e === v);
-		const b = this.featureList.findIndex(e => e === v);
+		const a = this.featureList.find(e => e.AttributeValueID === v.AttributeValueID);
+		const b = this.featureList.findIndex(e => e.AttributeValueID === v.AttributeValueID);
 
 		if (t === 'radio') {
-			if (a) {
-				this.featureList.splice(b, 1);
-			}
+			this.featureList.length = 0;
 			this.featureList.push(v);
 		} else {
-
 			if (a) {
-				this.featureList.splice(v);
+				return this.featureList.splice(b, 1);
 			}
 			this.featureList.push(v);
 		}
@@ -134,40 +123,71 @@ export class PartsComponent implements OnInit {
 		this.showAttributes = false;
 		this.showFeatures = true;
 
+		this.featureList = [];
+		this.selectedAttributes = [];
+
 		this.api.get('./attributes/data.json', 'Attributes(' + attr.AttributeID + ')/getattributevalues').subscribe(r => {
 			this.attributeFeatures = r['value'];
-		});
 
-		// COUNT > 1 OVERWRITE ALL
-		if (this.part.length === 1) {
+			if (this.part.length === 1) {
+				this._featureAttributes(this.attributeFeatures).then(
+					(res) => {
+						if (this.attributeFeatures.length > 0) {
+							this.featureList = res;
+							this.selectedAttributes = res;
+						} else {
+							this.featureList.push(res);
+							this.selectedAttributes.push(res);
+						}
+					},
+					(err) => {
+						this.featureList = [];
+						this.selectedAttributes = [];
+					}
+				);
+			}
+		});
+	}
+
+	private _featureAttributes(val): Promise<any> {
+		const b = [];
+		const a = new Promise((resolve, reject) => {
 			this.api.get('./attributes/data.json', 'parts(' + this.part[0].Id + ')?$expand=*&$select=PartAttributeValues').subscribe(res => {
 				if (res['PartAttributeValues'] !== []) {
 					for (const i of res['PartAttributeValues']) {
-						if (i.AttributeID === attr.AttributeID) {
-							this.selectedAttributes = i;
-							this.featureList.push(i.AttributeValueID);
+						if (val.length > 0) {
+							for (const x of val) {
+								if (i.AttributeValueID === x.AttributeValueID) {
+									b.push(i);
+								}
+							}
+							resolve(b);
+						} else {
+							if (i.AttributeValueID === val.AttributeValueID) {
+								resolve(i);
+							}
 						}
 					}
+				} else {
+					reject(null);
 				}
-				this.featureList = [];
-				this.selectedAttributes = 0;
 			});
-		} else {
-			this.featureList = [];
-			this.selectedAttributes = 0;
-		}
+		});
+
+		return a;
 	}
 
 	public selected(v): boolean {
-		let a = false;
 		const b = this.selectedAttributes;
-		if (b !== 0) {
-			if (v === b.AttributeValueID) {
-				a = true;
+		if (b !== undefined) {
+			if (b.length > 0) {
+				for (const i of b) {
+					if (v === i.AttributeValueID) {
+						return true;
+					}
+				}
 			}
 		}
-
-		return a;
 	}
 
 	alert(a, b) {

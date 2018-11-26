@@ -36,7 +36,7 @@ import { AlertModule } from 'ngx-bootstrap/alert';
 		UploadModule,
 		HttpClientModule,
 
-		// ALERT
+	
 		AlertModule.forRoot()
 	],
 	exports: [
